@@ -249,7 +249,9 @@ net.Receive("OpenAI.CLtoSV", function(len, ply)
 
     local use = hook.Run("OpenAI.CanUse", ply, C, P)
 
-    
+    if use then
+        openai[C](P, ply)
+    end
 end)
 
 --[[---------------------------------------------------------
