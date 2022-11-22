@@ -217,7 +217,7 @@ end
 	    Networking
 -----------------------------------------------------------]]
 
-function openai.canuse(ply, cmd, prompt)
+function openai.canuse(ply, cmd)
     if openai.blacklist[ply:SteamID()] then return false end
 
     local c = false
@@ -233,10 +233,9 @@ function openai.canuse(ply, cmd, prompt)
         end
     end
 
+    if not openai.allowed[cmd] then c = false end
 
-    if not openai.allowed[CMD] then c = false end
-
-    return canuse
+    return c
 end
 
 hook.Add("OpenAI.CanUse", "CanUse", openai.canuse)
@@ -247,10 +246,12 @@ net.Receive("OpenAI.CLtoSV", function(len, ply)
 
     if #P <= 9 then return end
 
-    local use = hook.Run("OpenAI.CanUse", ply, C, P)
+    local use = hook.Run("OpenAI.CanUse", ply, C)
 
     if use then
         openai[C](P, ply)
+    else
+        openai.print(ply:Nick() .. " Intento utilizar OpenAI")
     end
 end)
 
