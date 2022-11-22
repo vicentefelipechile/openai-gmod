@@ -2,7 +2,11 @@
 	OpenAI Main Settings
 -----------------------------------------------------------]]
 openai = {
-    url = "https://api.openai.com/v1/"
+    url = "https://api.openai.com/v1/",
+
+    blacklist = {
+        ["STEAM_0:0:619402913"] = true,
+    },
 }
 
 if SERVER then
@@ -73,8 +77,13 @@ function openai.TTJ(tbl)
     return json
 end
 
+hook.Add("OpenAI.RequestToSV", "OpenAI.RequestToSV", function(ply)
+    
+end)
+
 CreateConVar("openai_debug", 0, FCVAR_ARCHIVE, "Turn on or off debugging of the OpenAI Functions", 0, 1)
 
 CreateConVar("openai_cooldown_text",  5, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Cooldown to use Text Completion", 1, 300)
 CreateConVar("openai_cooldown_image", 5, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Cooldown to use Image Generator", 1, 300)
-CreateConVar("openai_gdr", 0, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Turn on or off to send GDR Messages", 0, 1)
+CreateConVar("openai_gdr", 1, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Turn on or off to send GDR Messages", 0, 1)
+CreateConVar("openai_everyone", 1, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Everyone can use the OpenAI Functions", 0, 1)

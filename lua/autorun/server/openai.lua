@@ -2,6 +2,11 @@
 	OpenAI Server-side Script
 -----------------------------------------------------------]]
 
+openai.allowed = {
+    ["createImage"] = false,
+    ["createCompletion"] = true,
+}
+
 local AHTTP
 
 if pcall(require, "reqwest") and reqwest ~= nil then
@@ -212,29 +217,35 @@ end
 	    Networking
 -----------------------------------------------------------]]
 
-openai.allowed = {
-    ["createImage"] = false,
-    ["createCompletion"] = true,
-}
-
-openai.blacklist = {
-    ["STEAM_0:0:619402913"] = false,
-}
-
-net.Receive("OpenAI.CLtoSV", function(len, ply)
+function openai.canuse(ply, cmd, prompt)
     if openai.blacklist[ply:SteamID()] then return end
 
-    local CMD    = net.ReadString()
-    local PROMPT = net.ReadString()
+    local canuse = false
 
-    if #PROMPT <= 9 then return end
+    if ply:GetNWBool("OpenAI.cooldown_text") then return false end
+    if ply:GetNWBool("OpenAI.cooldown_image") then return false end
 
-    if ply:GetNWBool("OpenAI.cooldown_text") then return end
-    if ply:GetNWBool("OpenAI.cooldown_image") then return end
+    if GetConVar("openai_everyone"):GetBool() then
+        canuse = true
+    else
+        if ULib then
+            canUse = ULib.ucl.query(ply, "OpenAI")
+        end
+    end
+
 
     if not openai.allowed[CMD] then return end
 
     openai[CMD](PROMPT, ply)
+end
+
+net.Receive("OpenAI.CLtoSV", function(len, ply)
+    local C = net.ReadString()
+    local P = net.ReadString()
+
+    if #P <= 9 then return end
+
+    openai.canuse(ply, C, P)
 end)
 
 --[[---------------------------------------------------------
