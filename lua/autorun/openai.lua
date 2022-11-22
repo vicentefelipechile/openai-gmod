@@ -42,7 +42,7 @@ end
 
 function openai.code(code)
     if code == 200 then
-        openai.print("Success to access - " .. code)
+        openai.print("Success to access - 200")
     else
         openai.print(code)
     end
@@ -76,10 +76,6 @@ function openai.TTJ(tbl)
 
     return json
 end
-
-hook.Add("OpenAI.RequestToSV", "OpenAI.RequestToSV", function(ply)
-    
-end)
 
 CreateConVar("openai_debug", 0, FCVAR_ARCHIVE, "Turn on or off debugging of the OpenAI Functions", 0, 1)
 

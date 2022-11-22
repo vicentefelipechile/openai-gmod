@@ -239,7 +239,7 @@ function openai.canuse(ply, cmd, prompt)
     return canuse
 end
 
-hook.Add("OpenAI.CanUse", )
+hook.Add("OpenAI.CanUse", "CanUse", openai.canuse)
 
 net.Receive("OpenAI.CLtoSV", function(len, ply)
     local C = net.ReadString()
@@ -247,7 +247,9 @@ net.Receive("OpenAI.CLtoSV", function(len, ply)
 
     if #P <= 9 then return end
 
-    openai.canuse(ply, C, P)
+    local use = hook.Run("OpenAI.CanUse", ply, C, P)
+
+    
 end)
 
 --[[---------------------------------------------------------
