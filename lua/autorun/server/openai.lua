@@ -218,26 +218,28 @@ end
 -----------------------------------------------------------]]
 
 function openai.canuse(ply, cmd, prompt)
-    if openai.blacklist[ply:SteamID()] then return end
+    if openai.blacklist[ply:SteamID()] then return false end
 
-    local canuse = false
+    local c = false
 
-    if ply:GetNWBool("OpenAI.cooldown_text") then return false end
-    if ply:GetNWBool("OpenAI.cooldown_image") then return false end
+    if ply:GetNWBool("OpenAI.cooldown_text") then c = false end
+    if ply:GetNWBool("OpenAI.cooldown_image") then c = false end
 
     if GetConVar("openai_everyone"):GetBool() then
-        canuse = true
+        c = true
     else
         if ULib then
-            canUse = ULib.ucl.query(ply, "OpenAI")
+            c = ULib.ucl.query(ply, "OpenAI")
         end
     end
 
 
-    if not openai.allowed[CMD] then return end
+    if not openai.allowed[CMD] then c = false end
 
-    openai[CMD](PROMPT, ply)
+    return canuse
 end
+
+hook.Add("OpenAI.CanUse", )
 
 net.Receive("OpenAI.CLtoSV", function(len, ply)
     local C = net.ReadString()
