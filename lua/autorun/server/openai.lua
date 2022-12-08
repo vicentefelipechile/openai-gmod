@@ -109,11 +109,17 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
     if ply then
 
         func = function(status, body, headers)
-            local request = util.JSONToTable(body)["choices"]
-            local data = string.sub(request[1]["text"], 3, -1)
+            local json = util.JSONToTable(body)
+            local data
+
+            if json["choices"] then
+                data = json["choices"][1]["text"]
+            elseif json["data"] then
+                data = json["data"][1]["url"]
+            end
 
             openai.code( status, _, _, _, true )
-            openai.print( data )
+            openai.print( data, _, _, _, true )
             openai.table( headers, true )
 
             openai.SVtoCL(data, prompt)
