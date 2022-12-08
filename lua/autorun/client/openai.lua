@@ -4,13 +4,13 @@
 
 local cAT = chat.AddText
 
-function openai.sendData(_, _, a, string)
-    if not a[2] then
+function openai.sendData(_, _, args, str)
+    if not args[2] then
         return openai.print("Error - Argumentos insuficientes")
     end
 
-    local l = a[1] .. " "
-    local prompt = string.sub(string, #l + 1, -1)
+    local l = args[1] .. " "
+    local prompt = string.sub(str, #l + 1, -1)
 
     if #prompt <= 9 then
         return openai.print("Error - Texto insuficiente")
@@ -39,7 +39,7 @@ hook.Add("OnPlayerChat", "OpenAI.ChatCommand", function(ply, text)
 
     text = string.Trim(text)
 
-    if string.StartWith(text, "!ai ") then
+    if string.StartWith(text, "!ai ") or string.StartWith(text, "!ia ") then
         local prompt = string.sub(text, 5, -1)
         LocalPlayer():ConCommand("openai createCompletion " .. prompt)
     end

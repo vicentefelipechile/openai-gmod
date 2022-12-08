@@ -1,74 +1,159 @@
 --[[---------------------------------------------------------
 	OpenAI Server-side Script
 -----------------------------------------------------------]]
+require("reqwest")
 
 openai.allowed = {
-    ["createImage"] = false,
-    ["createCompletion"] = true,
+    ["createImage"] = { true, "image" },
+    ["createCompletion"] = { true, "text" },
 }
 
-local AHTTP
 
-if pcall(require, "reqwest") and reqwest ~= nil then
-	AHTTP = reqwest
-else
-	AHTTP = HTTP
+--[[---------------------------------------------------------
+	Fallback to get token
+-----------------------------------------------------------]]
+
+local APIKEY = file.Read("openai_token.txt", "DATA")
+if not APIKEY then return end
+
+
+--[[---------------------------------------------------------
+	OpenAI Main/Core Functions
+-----------------------------------------------------------]]
+
+
+--[[---------------------------------------------------------
+	Function:   openai.timer
+    Args:       Player, Type
+
+    Player: The player to set timer
+    Type:   Type of text ("image" or "text")
+-----------------------------------------------------------]]
+function openai.timer(ply, type)
+    if not ply:IsPlayer() then return end
+
+    timer.Create( "OpenAI.Timer_" .. tostring(ply:SteamID64()), GetConVar("openai_cooldown_"..type):GetInt(), 1,
+    function()
+        ply:SetNWBool("OpenAI.cooldown_"..type, false)
+    end)
 end
 
 
-local APIKEY = file.Read("openai_token.txt", "DATA")
+--[[---------------------------------------------------------
+	Function:   openai.SVtoCL
+    Args:       Data, Prompt
 
-if not APIKEY then return end
+    Data:       The data to has to been compress
+    Type:       Text/prompt to display to everyone
+-----------------------------------------------------------]]
+function openai.SVtoCL(data, prompt)
+    local data = util.Compress(data)
+    local bytes = #data
+
+    net.Start("OpenAI.SVtoCL")
+        net.WriteUInt( bytes, 16 )
+        net.WriteData( data, bytes )
+        net.WriteString( prompt )
+    net.Broadcast()
+end
+
+
+--[[---------------------------------------------------------
+	Function:   openai.gdr
+    Args:       Data, Bool
+
+    Data:       Message to send to discord
+    Bool:       Display "**Entrada**" else, display "**Salida**"
+-----------------------------------------------------------]]
+function openai.gdr(data, bool)
+    if not prompt then return end
+
+    local output = bool and "**Entrada**: " or "**Salida**: "
+
+    hook.Run("GDR_sendMessage",
+    "https://i.imgur.com/LrLSpkT.png",
+    "OpenAI",
+    output .. data)
+end
+
+
+--[[---------------------------------------------------------
+	Function:   openai.reqwest
+    Args:       Url, Method, Body, Player, Prompt, Type
+
+    Url:        The 
+-----------------------------------------------------------]]
+function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
+    local func
+
+    if ply then
+
+        func = function(status, body, headers)
+            local request = util.JSONToTable(body)["choices"]
+            local data = string.sub(request[1]["text"], 3, -1)
+
+            openai.code( status, _, _, _, true )
+            openai.print( data )
+            openai.table( headers, true )
+
+            openai.SVtoCL(data, prompt)
+
+            if ply:IsPlayer() then
+
+                openai.timer(ply, aiType)
+
+                ply:SetNWBool("OpenAI.cooldown_" .. aiType, true)
+
+                if tGDRConfig and GetConVar("openai_gdr"):GetBool() then
+                    openai.gdr(prompt, true)
+                    openai.gdr(data)
+                end
+            end
+        end
+
+    else
+
+        func = function(code, body, headers)
+            openai.code(code, _, _, _, true)
+            print(body)
+            openai.table(headers, true)
+        end
+        
+    end
+
+    return {
+        url     = openai.url .. url,
+        type    = "application/json",
+        method  = method,
+        timeout = 20,
+        headers = {
+            ["Authorization"] = "Bearer " .. APIKEY
+        },
+
+        body = bodyHeader and openai.TTJ(bodyHeader) or "",
+
+        success = func,
+
+        failed = function(error)
+            openai.print("ERROR TRYING TO GET", _, _, _, true)
+            openai.print(error, _, _, _, true)
+        end
+    }
+end
+
 
 --[[---------------------------------------------------------
 	    GET Functions
 -----------------------------------------------------------]]
 
 function openai.listModels()
-    AHTTP({
-        url     =   openai.url .. "models",
-        method  =   "GET",
-        headers =   {
-            ["Authorization"] = "Bearer "..APIKEY
-        },
-
-        success = function(code, body, headers)
-            openai.code(code, _, _, _, true)
-
-            print(body)
-            openai.table(headers, true)
-        end,
-
-        failed = function(error)
-            openai.print("ERROR TRYING TO GET", _, _, _, true)
-            openai.print(error, _, _, _, true)
-        end
-    })
+    reqwest( openai.reqwest( "models", "GET" ) )
 end
 
 function openai.retrieveModel(_, _, args)
-    
     if not args[1] then return end
 
-    AHTTP({
-        url     =   openai.url .. "models/" .. args[1],
-        method  =   "GET",
-        headers =   {
-            ["Authorization"] = "Bearer "..APIKEY
-        },
-
-        success = function(code, body, headers)
-            openai.code(code, _, _, _, true)
-
-            print(body)
-            openai.table(headers, true)
-        end,
-
-        failed = function(error)
-            openai.print("ERROR TRYING TO GET", _, _, _, true)
-            print(error, _, _, _, true)
-        end
-    })
+    reqwest( openai.reqwest( "models/" .. args[1], "GET" ) )
 end
 
 
@@ -77,140 +162,27 @@ end
 -----------------------------------------------------------]]
 
 function openai.createCompletion(prompt, ply)
-    local data = ""
 
-    reqwest({
-        method      = "POST",
-        url         = openai.url .. "completions",
-        timeout     = 20,
+    reqwest(openai.reqwest("completions", "POST", {
+        ["model"]           = "text-davinci-002",
+        ["prompt"]          = prompt,
+        ["temperature"]     = 0.7,
+        ["max_tokens"]      = 76,
+        ["top_p"]           =  1,
+        ["frequency_penalty"]   = 0,
+        ["presence_penalty"]    = 0,
+    }, ply, prompt, "text" ))
 
-        body        = openai.TTJ({
-            ["model"]           = "text-davinci-002",
-            ["prompt"]          = prompt,
-            ["temperature"]     = 0.7,
-            ["max_tokens"]      = 76,
-            ["top_p"]           =  1,
-            ["frequency_penalty"]   = 0,
-            ["presence_penalty"]    = 0
-        }),
-
-        type        = "application/json",
-        headers     = {
-            ["Authorization"] = "Bearer "..APIKEY
-        },
-
-        success = function(status, body, headers)
-            local request = util.JSONToTable(body)["choices"]
-            openai.code(status, _, _, _, true)
-            openai.print( string.sub(request[1]["text"], 3, -1) )
-            openai.table(headers, true)
-
-            data = string.sub(request[1]["text"], 3, -1)
-
-            if ply:IsPlayer() then
-                local data_compressed = util.Compress(data)
-                local bytes = #data_compressed
-
-                openai.timer(ply, "image")
-
-                ply:SetNWBool("OpenAI.cooldown_image", true)
-
-                if tGDRConfig and GetConVar("openai_gdr"):GetBool() then
-                    hook.Run("GDR_sendMessage",
-                    "https://i.imgur.com/LrLSpkT.png",
-                    "OpenAI",
-                    "**Entrada**: " .. prompt)
-
-                    hook.Run("GDR_sendMessage",
-                    "https://i.imgur.com/LrLSpkT.png",
-                    "OpenAI",
-                    "**Salida**: " .. data)
-                end
-
-                net.Start("OpenAI.SVtoCL")
-                    net.WriteUInt( bytes, 16 )
-                    net.WriteData( data_compressed, bytes)
-					net.WriteString( prompt )
-				net.Broadcast()
-                --net.Send(ply)
-            end
-        end,
-        
-        failed = function(err, errExt)
-            openai.print(error, _, _, _, true)
-            openai.print(errExt, _, _, _, true)
-        end
-    })
-
-    return data, "text"
 end
 
 function openai.createImage(prompt, ply)
-    local data = ""
 
-    reqwest({
-        method  = "POST",
-        url     =   openai.url .. "images/generations",
-        timeout = 20,
+    reqwest(openai.reqwest("images/generations", "POST", {
+        ["prompt"]  = prompt,
+        ["n"]       = 1,
+        ["size"]    = "256x256"
+    }, ply, prompt, "image" ))
 
-        body    = openai.TTJ({
-            ["prompt"]  = prompt,
-            ["n"]       = 1,
-            ["size"]    = "256x256"
-        }),
-        type        = "application/json",
-        headers     = {
-            ["Authorization"] = "Bearer "..APIKEY
-        },
-
-        success = function(status, body, headers)
-            local request = util.JSONToTable(body)
-            PrintTable(request)
-    
-            openai.code(status, _, _, _, true)
-
-            if status == 200 then
-
-            openai.print(request["data"][1]["url"])
-            openai.table(headers, true)
-
-            data = request["data"][1]["url"]
-
-            if ply:IsPlayer() then
-                local data_compressed = util.Compress(data)
-                local bytes = #data_compressed
-
-                openai.timer(ply, "text")
-
-                ply:SetNWBool("OpenAI.cooldown_text", true)
-
-                net.Start("OpenAI.SVtoCL")
-                    net.WriteUInt( bytes, 16 )
-                    net.WriteData( data_compressed, bytes)
-                net.Send(ply)
-            end
-
-            end
-        end,
-        
-        failed = function(err, errExt)
-            openai.print(error, _, _, _, true)
-            openai.print(errExt, _, _, _, true)
-
-            data = "ERROR"
-        end
-    })
-
-    return data, "image"
-end
-
-function openai.timer(ply, type)
-    if not ply:IsPlayer() then return end
-
-    timer.Create( "OpenAI.Timer_" .. tostring(ply:SteamID64()), GetConVar("openai_cooldown_"..type):GetInt(), 1,
-        function()
-            ply:SetNWBool("OpenAI.cooldown_"..type, false)
-        end)
 end
 
 --[[---------------------------------------------------------
@@ -220,36 +192,39 @@ end
 function openai.canuse(ply, cmd)
     if openai.blacklist[ply:SteamID()] then return false end
 
-    local c = false
+    local canUse = false
+    local cmdType = openai.allowed[cmd][2]
 
-    if ply:GetNWBool("OpenAI.cooldown_text") then c = false end
-    if ply:GetNWBool("OpenAI.cooldown_image") then c = false end
+    if ply:GetNWBool("OpenAI.cooldown_text") then canUse = false end
+    if ply:GetNWBool("OpenAI.cooldown_image") then canUse = false end
 
     if GetConVar("openai_everyone"):GetBool() then
-        c = true
+        canUse = true
     else
         if ULib then
-            c = ULib.ucl.query(ply, "OpenAI")
+            canUse = ULib.ucl.query(ply, "OpenAI")
+		elseif ply:IsSuperAdmin() then
+            canUse = true
         end
     end
 
-    if not openai.allowed[cmd] then c = false end
+    if not openai.allowed[cmd][1] then canUse = false end
 
-    return c
+    return canUse, cmdType
 end
 
 hook.Add("OpenAI.CanUse", "CanUse", openai.canuse)
 
 net.Receive("OpenAI.CLtoSV", function(len, ply)
-    local C = net.ReadString()
-    local P = net.ReadString()
+    local command = net.ReadString()
+    local prompt = net.ReadString()
 
     if #P <= 9 then return end
 
-    local use = hook.Run("OpenAI.CanUse", ply, C)
+    local use, type = hook.Run("OpenAI.CanUse", ply, command)
 
     if use then
-        openai[C](P, ply)
+        openai[command](prompt, ply)
     else
         openai.print(ply:Nick() .. " Intento utilizar OpenAI")
     end

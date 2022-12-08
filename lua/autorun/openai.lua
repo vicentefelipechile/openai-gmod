@@ -10,14 +10,14 @@ openai = {
 }
 
 if SERVER then
-util.AddNetworkString("OpenAI.CLtoSV")
-util.AddNetworkString("OpenAI.SVtoCL")
+    util.AddNetworkString("OpenAI.CLtoSV")
+    util.AddNetworkString("OpenAI.SVtoCL")
 end
 
 --[[---------------------------------------------------------
 	OpenAI HTTP Module
 -----------------------------------------------------------]]
-function openai.print(v, color, breakline, p, d)
+function openai.print(v, color, breakline, noPrefix, debug)
 
     if d and not GetConVar("openai_debug"):GetBool() then return end
 
@@ -33,7 +33,7 @@ function openai.print(v, color, breakline, p, d)
         n = ""
     end
 
-    if p then
+    if noPrefix then
         prefix = ""
     end
 
@@ -41,16 +41,12 @@ function openai.print(v, color, breakline, p, d)
 end
 
 function openai.code(code)
-    if code == 200 then
-        openai.print("Success to access - 200")
-    else
-        openai.print(code)
-    end
+    return code == 200 and openai.print("Success to access - 200") or openai.print(code)
 end
 
-function openai.table(tbl, d)
+function openai.table(tbl, debug)
 
-    if d and not GetConVar("openai_debug"):GetBool() then return end
+    if debug and not GetConVar("openai_debug"):GetBool() then return end
 
     if not istable(tbl) then return openai.print(tbl) end
 
