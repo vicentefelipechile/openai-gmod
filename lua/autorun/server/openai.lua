@@ -239,7 +239,7 @@ net.Receive("OpenAI.CLtoSV", function(len, ply)
     local command = net.ReadString()
     local prompt = net.ReadString()
 
-    if #P <= 9 then return end
+    if #prompt <= 9 then return end
 
     local use, type = hook.Run("OpenAI.CanUse", ply, command)
 
