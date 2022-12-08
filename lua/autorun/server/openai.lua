@@ -1,7 +1,6 @@
 --[[---------------------------------------------------------
     OpenAI Server-side Script
 -----------------------------------------------------------]]
-require("reqwest")
 
 openai.allowed = {
     ["createImage"] = { true, "image" },
@@ -16,9 +15,21 @@ openai.allowed = {
 local APIKEY = file.Read("openai_token.txt", "DATA")
 if not APIKEY then return end
 
-if pcall(require, "reqwest") and reqwest ~= nil then
-    openai.print("Error \"Reqwest\" Module isn't installed", Color(200, 40, 40))
+local suffix = ({"osx64", "osx", "linux64", "linux", "win64", "win32"})[(system.IsWindows() and 4 or 0) + (system.IsLinux() and 2 or 0) + (jit.arch == "x86" and 1 or 0) + 1]
+local fmt    = "lua/bin/gm" .. (CLIENT and "cl" or "sv") .. "_%s_%s.dll"
+local function installed(name)
+    if file.Exists( string.format(fmt, name, suffix), "GAME" ) then return true end
+    if jit.version_num ~= 20004 and jit.arch == "x86" and system.IsLinux() then return file.Exists(string.format(fmt, name, "linux32"), "GAME") end
+    return false
+end
+
+if not installed("reqwest") then
+    openai.print("Error \"Reqwest\" Module isn't installed", Color(255, 50, 50))
     openai.print("Are you sure that is the correct version?")
+    return
+else
+    require("reqwest")
+end
 
 
 --[[---------------------------------------------------------

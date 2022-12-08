@@ -17,7 +17,7 @@ function openai.sendData(_, _, args, str)
     end
 
     net.Start("OpenAI.CLtoSV")
-        net.WriteString(a[1])
+        net.WriteString(args[1])
         net.WriteString(prompt)
     net.SendToServer()
 
