@@ -113,7 +113,7 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
             local data
 
             if json["choices"] then
-                data = json["choices"][1]["text"]
+                data = string.Trim(json["choices"][1]["text"])
             elseif json["data"] then
                 data = json["data"][1]["url"]
             end
