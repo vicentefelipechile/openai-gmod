@@ -26,6 +26,7 @@ end
 if not installed("reqwest") then
     openai.print("Error \"Reqwest\" Module isn't installed", Color(255, 50, 50))
     openai.print("Are you sure that is the correct version?")
+    openai.print("You need to install this version: " .. system.IsWindows()and"Windows"or system.IsLinux()and"Linux"or"Unsupported").." "..(jit.arch=="x64"and"x86-64"or"x86")
     return
 else
     require("reqwest")
