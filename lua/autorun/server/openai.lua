@@ -24,9 +24,34 @@ local function installed(name)
 end
 
 if not installed("reqwest") then
+    local version = "gmsv_reqwest_"
+
+    if system.IsWindows() then
+        version = version .. "win"
+
+        if jit.arch == "x64" then
+            version = version .. "64.dll"
+        else
+            version = version .. "32.dll"
+        end
+
+    elseif system.IsLinux() then
+        version = version .. "linux"
+
+        if jit.arch == "x64" then
+            version = version .. "64.dll"
+        else
+            version = version .. ".dll"
+        end
+    else
+        version = "Unsupported"
+    end
+
+
+
     openai.print("Error \"Reqwest\" Module isn't installed", Color(255, 50, 50))
     openai.print("Are you sure that is the correct version?")
-    openai.print("You need to install this version: " .. system.IsWindows()and"Windows"or system.IsLinux()and"Linux"or"Unsupported").." "..(jit.arch=="x64"and"x86-64"or"x86")
+    openai.print("You need to install this version: " .. version)
     return
 else
     require("reqwest")
@@ -141,9 +166,10 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
     else
 
         func = function(code, body, headers)
-            openai.code(code, _, _, _, true)
-            openai.print(body)
-            openai.table(headers, true)
+            local json = util.JSONToTable(body)
+            openai.code( code, _, _, _, true )
+            PrintTable( json )
+            openai.table( headers, true )
         end
         
     end
@@ -178,7 +204,7 @@ function openai.listModels()
 end
 
 function openai.retrieveModel(_, _, args)
-    if not args[1] then return end
+    if not args and not args[1] then return end
 
     reqwest( openai.reqwest( "models/" .. args[1], "GET" ) )
 end
