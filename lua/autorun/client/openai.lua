@@ -1,5 +1,5 @@
 --[[---------------------------------------------------------
-	OpenAI Client-side Script
+    OpenAI Client-side Script
 -----------------------------------------------------------]]
 
 local cAT = chat.AddText
@@ -49,7 +49,7 @@ net.Receive("OpenAI.SVtoCL", function()
     local bytes = net.ReadUInt(16)
     local data_compressed = net.ReadData( bytes )
     local data = util.Decompress(data_compressed)
-	local prompt = net.ReadString()
+    local prompt = net.ReadString()
     
     openai.print(data, Color(237, 255, 101))
     cAT(Color(255, 255, 255), "[OpenAI] Entrada: ", Color(81, 173, 173),  prompt)

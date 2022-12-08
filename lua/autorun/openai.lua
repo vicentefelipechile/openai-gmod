@@ -1,5 +1,5 @@
 --[[---------------------------------------------------------
-	OpenAI Main Settings
+    OpenAI Main Settings
 -----------------------------------------------------------]]
 openai = {
     url = "https://api.openai.com/v1/",
@@ -15,7 +15,7 @@ if SERVER then
 end
 
 --[[---------------------------------------------------------
-	OpenAI HTTP Module
+    OpenAI HTTP Module
 -----------------------------------------------------------]]
 function openai.print(v, color, breakline, noPrefix, debug)
 

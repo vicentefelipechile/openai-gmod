@@ -1,5 +1,5 @@
 --[[---------------------------------------------------------
-	OpenAI Server-side Script
+    OpenAI Server-side Script
 -----------------------------------------------------------]]
 require("reqwest")
 
@@ -10,7 +10,7 @@ openai.allowed = {
 
 
 --[[---------------------------------------------------------
-	Fallback to get token
+    Fallback to get token
 -----------------------------------------------------------]]
 
 local APIKEY = file.Read("openai_token.txt", "DATA")
@@ -18,12 +18,12 @@ if not APIKEY then return end
 
 
 --[[---------------------------------------------------------
-	OpenAI Main/Core Functions
+    OpenAI Main/Core Functions
 -----------------------------------------------------------]]
 
 
 --[[---------------------------------------------------------
-	Function:   openai.timer
+    Function:   openai.timer
     Args:       Player, Type
 
     Player: The player to set timer
@@ -40,7 +40,7 @@ end
 
 
 --[[---------------------------------------------------------
-	Function:   openai.SVtoCL
+    Function:   openai.SVtoCL
     Args:       Data, Prompt
 
     Data:       The data to has to been compress
@@ -59,7 +59,7 @@ end
 
 
 --[[---------------------------------------------------------
-	Function:   openai.gdr
+    Function:   openai.gdr
     Args:       Data, Bool
 
     Data:       Message to send to discord
@@ -78,7 +78,7 @@ end
 
 
 --[[---------------------------------------------------------
-	Function:   openai.reqwest
+    Function:   openai.reqwest
     Args:       Url, Method, Body, Player, Prompt, Type
 
     Url:        The 
@@ -115,7 +115,7 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
 
         func = function(code, body, headers)
             openai.code(code, _, _, _, true)
-            print(body)
+            openai.print(body)
             openai.table(headers, true)
         end
         
@@ -143,7 +143,7 @@ end
 
 
 --[[---------------------------------------------------------
-	    GET Functions
+        GET Functions
 -----------------------------------------------------------]]
 
 function openai.listModels()
@@ -158,7 +158,7 @@ end
 
 
 --[[---------------------------------------------------------
-	    POST Functions
+        POST Functions
 -----------------------------------------------------------]]
 
 function openai.createCompletion(prompt, ply)
@@ -186,7 +186,7 @@ function openai.createImage(prompt, ply)
 end
 
 --[[---------------------------------------------------------
-	    Networking
+        Networking
 -----------------------------------------------------------]]
 
 function openai.canuse(ply, cmd)
@@ -203,7 +203,7 @@ function openai.canuse(ply, cmd)
     else
         if ULib then
             canUse = ULib.ucl.query(ply, "OpenAI")
-		elseif ply:IsSuperAdmin() then
+        elseif ply:IsSuperAdmin() then
             canUse = true
         end
     end
@@ -231,7 +231,7 @@ net.Receive("OpenAI.CLtoSV", function(len, ply)
 end)
 
 --[[---------------------------------------------------------
-	    PlayerInitialSpawn
+        PlayerInitialSpawn
 -----------------------------------------------------------]]
 hook.Add("PlayerInitialSpawn", "OpenAI.InitSpawn", function(ply)
     ply:SetNWBool("OpenAI.cooldown_text", false)
