@@ -17,9 +17,9 @@ end
 --[[---------------------------------------------------------
     OpenAI HTTP Module
 -----------------------------------------------------------]]
-function openai.print(v, color, breakline, noPrefix, debug)
+function openai.print(str, color, breakline, noPrefix, debug)
 
-    if d and not GetConVar("openai_debug"):GetBool() then return end
+    if debug and not GetConVar("openai_debug"):GetBool() then return end
 
     if not IsColor(color) then
         color = Color(123, 250, 250)
@@ -37,7 +37,7 @@ function openai.print(v, color, breakline, noPrefix, debug)
         prefix = ""
     end
 
-    MsgC(Color(255, 255, 255), prefix, color, tostring(v) .. n)
+    MsgC(Color(255, 255, 255), prefix, color, tostring(str) .. n)
 end
 
 function openai.code(code)
