@@ -10,11 +10,15 @@ openai.allowed = {
 
 
 --[[---------------------------------------------------------
-    Fallback to get token
+    Fallbacks
 -----------------------------------------------------------]]
 
 local APIKEY = file.Read("openai_token.txt", "DATA")
 if not APIKEY then return end
+
+if pcall(require, "reqwest") and reqwest ~= nil then
+    openai.print("Error \"Reqwest\" Module isn't installed", Color(200, 40, 40))
+    openai.print("Are you sure that is the correct version?")
 
 
 --[[---------------------------------------------------------
