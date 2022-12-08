@@ -26,8 +26,8 @@ if not APIKEY then return end
     Function:   openai.timer
     Args:       Player, Type
 
-    Player: The player to set timer
-    Type:   Type of text ("image" or "text")
+    Player:     The player to set timer
+    Type:       Type of text ("image" or "text")
 -----------------------------------------------------------]]
 function openai.timer(ply, type)
     if not ply:IsPlayer() then return end
@@ -44,7 +44,7 @@ end
     Args:       Data, Prompt
 
     Data:       The data to has to been compress
-    Type:       Text/prompt to display to everyone
+    Prompt:     Text/prompt to display to everyone
 -----------------------------------------------------------]]
 function openai.SVtoCL(data, prompt)
     local data = util.Compress(data)
@@ -81,7 +81,12 @@ end
     Function:   openai.reqwest
     Args:       Url, Method, Body, Player, Prompt, Type
 
-    Url:        The 
+    Url:        The url is used to use any available model
+    Method:     What http is meant to be use
+    Body:       What arguments want to send to server
+    Player:     If player is set, then will be sent to all players
+    Prompt:     The text to sent to all players
+    Type:       Type of text ("image" or "text")
 -----------------------------------------------------------]]
 function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
     local func
