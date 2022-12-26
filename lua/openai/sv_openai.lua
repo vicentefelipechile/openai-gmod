@@ -7,6 +7,12 @@ openai.allowed = {
     ["createCompletion"] = { true, "text" },
 }
 
+openai.img = {
+    [1] = "256x256",
+    [2] = "512x512",
+    [3] = "1024x1024",
+}
+
 
 --[[---------------------------------------------------------
     Fallbacks
@@ -209,7 +215,7 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
         success = function(code, body, headers)
             openai.code(code)
             openai.print(body)
-            openai.print(headers)
+            PrintTable(headers)
         end,
 
         failed = function(error)
@@ -258,7 +264,7 @@ function openai.createImage(prompt, ply)
     reqwest(openai.reqwest("images/generations", "POST", {
         ["prompt"]  = prompt,
         ["n"]       = 1,
-        ["size"]    = "256x256"
+        ["size"]    = openai.img[GetConVar("openai_image_resolution"):GetInt()] or "256x256"
     }, ply, prompt, "image" ))
 
 end

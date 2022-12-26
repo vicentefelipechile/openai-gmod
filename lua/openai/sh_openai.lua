@@ -81,3 +81,4 @@ CreateConVar("openai_cooldown_text",  5, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_
 CreateConVar("openai_cooldown_image", 5, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Cooldown to use Image Generator", 1, 300)
 CreateConVar("openai_gdr", 1, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Turn on or off to send GDR Messages", 0, 1)
 CreateConVar("openai_everyone", 1, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Everyone can use the OpenAI Functions", 0, 1)
+CreateConVar("openai_image_resolution", 1, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "What resolution will be of the image?", 1, 3)
