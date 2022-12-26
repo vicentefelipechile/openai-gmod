@@ -214,8 +214,10 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
 
         success = function(code, body, headers)
             openai.code(code)
-            PrintTable(util.JSONToTable(body))
-            PrintTable(headers)
+            if tonumber(code) == 200 then
+                PrintTable(util.JSONToTable(body)[1]["url"])
+                PrintTable(headers)
+            end
         end,
 
         failed = function(error)
