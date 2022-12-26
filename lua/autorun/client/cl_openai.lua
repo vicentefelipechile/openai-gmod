@@ -79,7 +79,7 @@ net.Receive("OpenAI.IMGtoCL", function()
     local url = net.ReadString()
 
     HTTP({
-        ["url"]         = url
+        ["url"]         = url,
         ["method"]      = "GET",
         ["headers"]     = {},
 
