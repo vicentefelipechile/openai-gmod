@@ -12,10 +12,12 @@ openai = {
 if SERVER then
     util.AddNetworkString("OpenAI.CLtoSV")
     util.AddNetworkString("OpenAI.SVtoCL")
+
+    util.AddNetworkString("OpenAI.IMGtoCL")
 end
 
 --[[---------------------------------------------------------
-    OpenAI HTTP Module
+    OpenAI Main Scripts
 -----------------------------------------------------------]]
 function openai.print(str, color, breakline, noPrefix, debug)
 

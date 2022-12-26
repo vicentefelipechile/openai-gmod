@@ -15,6 +15,7 @@ openai.allowed = {
 local APIKEY = file.Read("openai_token.txt", "DATA")
 if not APIKEY then return end
 
+-- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L369-L397
 local suffix = ({"osx64", "osx", "linux64", "linux", "win64", "win32"})[(system.IsWindows() and 4 or 0) + (system.IsLinux() and 2 or 0) + (jit.arch == "x86" and 1 or 0) + 1]
 local fmt    = "lua/bin/gm" .. (CLIENT and "cl" or "sv") .. "_%s_%s.dll"
 local function installed(name)

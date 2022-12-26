@@ -2,6 +2,8 @@
     OpenAI Client-side Script
 -----------------------------------------------------------]]
 
+CreateClientConVar("openai_downloadimg", 1, true, true, "Should download images from server?", 0, 1)
+
 local cAT = chat.AddText
 
 function openai.sendData(_, _, args, str)
@@ -24,12 +26,10 @@ function openai.sendData(_, _, args, str)
 end
 
 function openai.typeData(cmd, args)
-    local tbl = {
+    return {
         cmd .. " createCompletion",
         cmd .. " createImage",
     }
-
-    return tbl
 end
 
 concommand.Add("openai", openai.sendData, openai.typeData)
@@ -45,6 +45,23 @@ hook.Add("OnPlayerChat", "OpenAI.ChatCommand", function(ply, text)
     end
 end)
 
+--[[---------------------------------------------------------
+    OpenAI Functions
+-----------------------------------------------------------]]
+
+function openai.fileExists(name)
+    if not name then
+        return file.Exists("openai", "DATA") and openai.print("The directory exists!") or
+        openai.print("Directory doesn't exists! creating...") and file.CreateDir("openai")
+    end
+    
+    
+end
+
+--[[---------------------------------------------------------
+    OpenAI Network Functions
+-----------------------------------------------------------]]
+
 net.Receive("OpenAI.SVtoCL", function()
     local bytes = net.ReadUInt(16)
     local data_compressed = net.ReadData( bytes )
@@ -54,4 +71,27 @@ net.Receive("OpenAI.SVtoCL", function()
     openai.print(data, Color(237, 255, 101))
     cAT(Color(255, 255, 255), "[OpenAI] Entrada: ", Color(81, 173, 173),  prompt)
     cAT(Color(255, 255, 255), "[OpenAI] Salida: ", Color(59, 183, 255),  data)
+end)
+
+net.Receive("OpenAI.IMGtoCL", function()
+    if not GetConVar("openai_downloadimg"):GetBool() then return end
+
+    local url = net.ReadString()
+
+    HTTP({
+        ["url"]         = url
+        ["method"]      = "GET",
+        ["headers"]     = {},
+
+        ["success"]     = function(code, body, headers)
+            openai.code(code)
+            openai.print(headers)
+
+            print(body)
+        end,
+
+        ["failed"]      = function(error)
+            openai.print(error)
+        end
+    })
 end)
