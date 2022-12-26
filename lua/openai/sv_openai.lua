@@ -214,7 +214,7 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
 
         success = function(code, body, headers)
             openai.code(code)
-            openai.print(body)
+            PrintTable(util.JSONToTable(body))
             PrintTable(headers)
         end,
 
