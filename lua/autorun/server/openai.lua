@@ -58,6 +58,7 @@ else
     require("reqwest")
 end
 
+openai.print("OpenAI has been successful loaded")
 
 --[[---------------------------------------------------------
     OpenAI Main/Core Functions
