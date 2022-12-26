@@ -109,7 +109,7 @@ end
     Bool:       Display "**Entrada**" else, display "**Salida**"
 -----------------------------------------------------------]]
 function openai.gdr(data, bool)
-    if not prompt then return end
+    if not data then return end
 
     local output = bool and "**Entrada**: " or "**Salida**: "
 
@@ -176,7 +176,7 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
         
     end
 
-    return {
+    return aiType == "text" and {
         url     = openai.url .. url,
         type    = "application/json",
         method  = method,
@@ -188,6 +188,29 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
         body = bodyHeader and openai.TTJ(bodyHeader) or "",
 
         success = func,
+
+        failed = function(error)
+            openai.print("ERROR TRYING TO GET", _, _, _, true)
+            openai.print(error, _, _, _, true)
+        end
+    } or 
+
+    aiType == "image" and {
+        url     = openai.url .. url,
+        type    = "application/json",
+        method  = method,
+        timeout = 20,
+        headers = {
+            ["Authorization"] = "Bearer " .. APIKEY
+        },
+
+        body = bodyHeader and openai.TTJ(bodyHeader) or "",
+
+        success = function(code, body, headers)
+            openai.code(code)
+            openai.print(body)
+            openai.print(headers)
+        end,
 
         failed = function(error)
             openai.print("ERROR TRYING TO GET", _, _, _, true)
