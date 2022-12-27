@@ -64,11 +64,11 @@ local noValid = "<>:\"/\\|?*"
 function openai.writeImage(image, prompt)
     if not image then return end
 
-    prompt = string.sub(prompt, 1, 48)
+    prompt = string.gsub( string.sub(prompt, 1, 48), " ", "_" )
 
     for i=1, #prompt do
         local char = string.gsub(prompt, i, i)
-        if string.find(noValid, char) or string.find(" ", char) then
+        if string.find(noValid, char) then
             prompt = string.gsub(prompt, char, "_")
         end
     end
