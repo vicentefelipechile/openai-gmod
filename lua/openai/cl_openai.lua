@@ -52,11 +52,27 @@ end)
 function openai.createDir()
     return file.Exists("openai", "DATA") or file.CreateDir("openai") and openai.print("The directory has been created succesful!")
 end
+openai.createDir()
 
-function openai.writeImage(name)
+local noValid = '<>:"/\|?*'
+
+function openai.writeImage(image, prompt)
     if not image then return end
 
-    
+    prompt = string.sub(prompt, 1, 32)
+
+    for i=1, #prompt do
+        local char = string.gsub(prompt, i, i)
+        if string.find(noValid, char) then
+            prompt = string.gsub(prompt, char, "_")
+        end
+    end
+
+    local filename = os.time() .. "_" .. prompt .. ".png"
+
+    file.Write("openai/" .. filename, image)
+    openai.print("File saved succesful!")
+    openai.print("Saved as: " .. filename)
 end
 
 --[[---------------------------------------------------------
@@ -77,7 +93,9 @@ end)
 net.Receive("OpenAI.IMGtoCL", function()
     if not GetConVar("openai_downloadimg"):GetBool() then return end
 
+    openai.print("Url received succesful!")
     local url = net.ReadString()
+    local prompt = net.ReadString()
 
     HTTP({
         ["url"]         = url,
@@ -86,13 +104,14 @@ net.Receive("OpenAI.IMGtoCL", function()
 
         ["success"]     = function(code, body, headers)
             openai.code(code)
-            openai.print(headers)
 
-            print(body)
+            openai.writeImage(body, prompt)
         end,
 
         ["failed"]      = function(error)
             openai.print(error)
         end
     })
+
+    openai.print("Downloading...")
 end)

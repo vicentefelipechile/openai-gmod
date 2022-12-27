@@ -43,7 +43,7 @@ function openai.print(str, color, breakline, noPrefix, debug)
 end
 
 function openai.code(code)
-    return code == 200 and openai.print("Success to access - 200") or openai.print(code)
+    return tonumber(code) == 200 and openai.print("Success to access - 200") or openai.print(code)
 end
 
 function openai.table(tbl, debug)

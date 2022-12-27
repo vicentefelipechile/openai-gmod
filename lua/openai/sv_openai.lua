@@ -218,6 +218,7 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
                 local img = util.JSONToTable(body)["data"][1]["url"]
                 net.Start("OpenAI.IMGtoCL")
                     net.WriteString(img)
+                    net.WriteString(prompt)
                 net.Broadcast()
             end
         end,
