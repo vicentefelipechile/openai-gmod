@@ -215,8 +215,10 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
         success = function(code, body, headers)
             openai.code(code)
             if tonumber(code) == 200 then
-                openai.print(util.JSONToTable(body)["data"][1]["url"])
-                PrintTable(headers)
+                local img = util.JSONToTable(body)["data"][1]["url"]
+                net.Start("OpenAI.IMGtoCL")
+                    net.WriteString(img)
+                net.Broadcast()
             end
         end,
 

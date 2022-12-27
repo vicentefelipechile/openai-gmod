@@ -49,12 +49,13 @@ end)
     OpenAI Functions
 -----------------------------------------------------------]]
 
-function openai.fileExists(name)
-    if not name then
-        return file.Exists("openai", "DATA") and openai.print("The directory exists!") or
-        openai.print("Directory doesn't exists! creating...") and file.CreateDir("openai")
-    end
-    
+function openai.createDir()
+    return file.Exists("openai", "DATA") or file.CreateDir("openai") and openai.print("The directory has been created succesful!")
+end
+
+function openai.writeImage(name)
+    if not image then return end
+
     
 end
 
@@ -68,7 +69,7 @@ net.Receive("OpenAI.SVtoCL", function()
     local data = util.Decompress(data_compressed)
     local prompt = net.ReadString()
     
-    openai.print(data, Color(237, 255, 101))
+    -- openai.print(data, Color(237, 255, 101))
     cAT(Color(255, 255, 255), "[OpenAI] Entrada: ", Color(81, 173, 173),  prompt)
     cAT(Color(255, 255, 255), "[OpenAI] Salida: ", Color(59, 183, 255),  data)
 end)
