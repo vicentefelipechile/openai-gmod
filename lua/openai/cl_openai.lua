@@ -37,11 +37,16 @@ concommand.Add("openai", openai.sendData, openai.typeData)
 hook.Add("OnPlayerChat", "OpenAI.ChatCommand", function(ply, text)
     if not ( ply == LocalPlayer() ) then return end
 
-    text = string.Trim(text)
+    text = string.Trim(string.lower(text))
 
     if string.StartWith(text, "!ai ") or string.StartWith(text, "!ia ") then
-        local prompt = string.sub(text, 5, -1)
+        local prompt = string.sub(text, 5)
         LocalPlayer():ConCommand("openai createCompletion " .. prompt)
+    end
+
+    if string.StartWith(text, "!img ") then
+        local prompt = string.sub(text, 6)
+        LocalPlayer():ConCommand("openai createImage " .. prompt)
     end
 end)
 
