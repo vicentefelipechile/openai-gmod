@@ -54,7 +54,7 @@ function openai.createDir()
 end
 openai.createDir()
 
-local noValid = '<>:"/\|?*'
+local noValid = "<>:\"/\\|?*"
 
 function openai.writeImage(image, prompt)
     if not image then return end
