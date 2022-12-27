@@ -59,7 +59,7 @@ function openai.createDir()
 end
 openai.createDir()
 
-local noValid = "<>:\"/\\|?* "
+local noValid = "<>:\"/\\|?*"
 
 function openai.writeImage(image, prompt)
     if not image then return end
@@ -68,7 +68,7 @@ function openai.writeImage(image, prompt)
 
     for i=1, #prompt do
         local char = string.gsub(prompt, i, i)
-        if string.find(noValid, char) then
+        if string.find(noValid, char) or string.find(" ", char) then
             prompt = string.gsub(prompt, char, "_")
         end
     end
