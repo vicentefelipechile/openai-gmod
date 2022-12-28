@@ -54,32 +54,6 @@ end)
     OpenAI Functions
 -----------------------------------------------------------]]
 
-function openai.createDir()
-    return file.Exists("openai", "DATA") or file.CreateDir("openai") and openai.print("The directory has been created succesful!")
-end
-openai.createDir()
-
-local noValid = "<>:\"/\\|?*"
-
-function openai.writeImage(image, prompt)
-    if not image then return end
-
-    prompt = string.gsub( string.sub(prompt, 1, 48), " ", "_" )
-
-    for i=1, #prompt do
-        local char = string.gsub(prompt, i, i)
-        if string.find(noValid, char) then
-            prompt = string.gsub(prompt, char, "_")
-        end
-    end
-
-    local filename = os.time() .. "_" .. prompt .. ".png"
-
-    file.Write("openai/" .. filename, image)
-    openai.print("File saved succesful!")
-    openai.print("Saved as: " .. filename)
-end
-
 --[[---------------------------------------------------------
     OpenAI Network Functions
 -----------------------------------------------------------]]
@@ -110,7 +84,7 @@ net.Receive("OpenAI.IMGtoCL", function()
         ["success"]     = function(code, body, headers)
             openai.code(code)
 
-            openai.writeImage(body, prompt)
+            openai.writeImage(body, prompt, url)
         end,
 
         ["failed"]      = function(error)

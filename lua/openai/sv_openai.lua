@@ -13,13 +13,22 @@ openai.img = {
     [3] = "1024x1024",
 }
 
-
 --[[---------------------------------------------------------
     Fallbacks
 -----------------------------------------------------------]]
 
 local APIKEY = file.Read("openai_token.txt", "DATA")
-if not APIKEY then return end
+if not APIKEY then
+    file.Write("openai/token.txt", "Put your token here")
+    openai.print("Error \"openai/openai_token.txt\" doesn't found", Color(255, 50, 50))
+    openai.print("Creating one...")
+    openai.print("Next time you restart or change the map on your server")
+    return
+elseif #APIKEY == 0 then
+    openai.print("Error \"openai/openai_token.txt\" is empty", Color(255, 50, 50))
+    openai.print("Maybe you forgot to put the token?")
+    return
+end
 
 -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L369-L397
 local suffix = ({"osx64", "osx", "linux64", "linux", "win64", "win32"})[(system.IsWindows() and 4 or 0) + (system.IsLinux() and 2 or 0) + (jit.arch == "x86" and 1 or 0) + 1]
@@ -53,8 +62,6 @@ if not installed("reqwest") then
     else
         version = "Unsupported"
     end
-
-
 
     openai.print("Error \"Reqwest\" Module isn't installed", Color(255, 50, 50))
     openai.print("Are you sure that is the correct version?")
@@ -216,6 +223,23 @@ function openai.reqwest(url, method, bodyHeader, ply, prompt, aiType)
             openai.code(code)
             if tonumber(code) == 200 then
                 local img = util.JSONToTable(body)["data"][1]["url"]
+
+                HTTP({
+                    ["url"]         = url,
+                    ["method"]      = "GET",
+                    ["headers"]     = {},
+            
+                    ["success"]     = function(code, body, headers)
+                        openai.code(code)
+            
+                        openai.writeImage(body, prompt, url)
+                    end,
+            
+                    ["failed"]      = function(error)
+                        openai.print(error)
+                    end
+                })
+
                 net.Start("OpenAI.IMGtoCL")
                     net.WriteString(img)
                     net.WriteString(prompt)

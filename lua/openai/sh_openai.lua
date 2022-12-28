@@ -18,13 +18,13 @@ end
 
 --[[---------------------------------------------------------
     OpenAI Main Scripts
------------------------------------------------------------]]
+---------------------------------------------------------]]--
 function openai.print(str, color, breakline, noPrefix, debug)
 
     if debug and not GetConVar("openai_debug"):GetBool() then return end
 
     if not IsColor(color) then
-        color = Color(123, 250, 250)
+        color = SERVER and Color(123, 250, 250) or Color(212, 250, 123)
     end
 
     local n = "\n"
@@ -74,6 +74,47 @@ function openai.TTJ(tbl)
 
     return json
 end
+
+function openai.createDir()
+    return file.Exists("openai", "DATA") or file.CreateDir("openai") and openai.print("The directory has been created succesful!")
+end
+openai.createDir()
+
+
+local noValid = "<>:\"/\\|?*"
+
+function openai.writeImage(image, prompt, url, ply)
+    if not image then return end
+    if not prompt then return end
+
+    prompt = string.gsub( string.sub(prompt, 1, 48), " ", "_" )
+
+    for i=1, #prompt do
+        local char = string.gsub(prompt, i, i)
+        if string.find(noValid, char) then
+            prompt = string.gsub(prompt, char, "_")
+        end
+    end
+
+    local filename = os.time() .. "_" .. prompt
+
+    file.Write("openai/" .. filename .. ".png", image)
+    openai.print("File saved succesful!")
+    openai.print("Saved as: " .. filename)
+
+    if SERVER then
+        file.Write("openai/" .. filename .. ".txt", [[
+Player: ]] .. ply:Nick() [[
+Prompt: ]] .. prompt .. [[
+Date: ]] .. os.date("%d-%m-%y %X at %A"))
+    end
+end
+
+
+
+--[[---------------------------------------------------------
+    OpenAI Replicated Convars
+---------------------------------------------------------]]--
 
 CreateConVar("openai_debug", 0, FCVAR_ARCHIVE, "Turn on or off debugging of the OpenAI Functions", 0, 1)
 
