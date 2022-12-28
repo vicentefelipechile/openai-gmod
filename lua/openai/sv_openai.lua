@@ -17,17 +17,56 @@ openai.img = {
     Fallbacks
 -----------------------------------------------------------]]
 
-local APIKEY = file.Read("openai_token.txt", "DATA")
-if not APIKEY then
-    file.Write("openai/token.txt", "Put your token here")
-    openai.print("Error \"openai/openai_token.txt\" doesn't found", Color(255, 50, 50))
-    openai.print("Creating one...")
-    openai.print("Next time you restart or change the map on your server")
-    return
+local APIKEY = ""
+
+if file.Read("lua/openai_token.lua", "GAME") then
+
+    APIKEY = file.Read("lua/openai_token.lua", "GAME")
+
+    if #APIKEY == 0 then
+
+        openai.print("Error \"lua/openai_token.lua\" is empty", Color(255, 50, 50))
+        openai.print("Maybe you forgot to put the token?")
+        return
+    end
+    
+elseif not APIKEY then
+
+    if file.Exists("openai_token.txt", "DATA") then
+
+        APIKEY = file.Read("openai_token.txt", "DATA")
+
+        if #APIKEY == 0 then
+            openai.print("Error the fallback token is empty", Color(255, 50, 50))
+            file.Delete("openai_token.txt")
+
+            openai.print("Error \"openai/openai_token.txt\" doesn't found", Color(255, 50, 50))
+            openai.print("Creating one...")
+            openai.print("Next time you restart or change the map on your server")
+            openai.print("You must have put your token in \"garrysmod/data/openai/openai_token.txt\"")
+            return
+        end
+
+        openai.print("Token found in the main DATA folder, moving to openai folder...")
+        file.Write("openai/openai_token.txt", APIKEY)
+
+    else
+
+        file.Write("openai/openai_token.txt", "Put your token here")
+        openai.print("Error \"openai/openai_token.txt\" doesn't found", Color(255, 50, 50))
+        openai.print("Creating one...")
+        openai.print("Next time you restart or change the map on your server")
+        openai.print("You must have put your token in \"garrysmod/data/openai/openai_token.txt\"")
+        return
+
+    end
+
 elseif #APIKEY == 0 then
+
     openai.print("Error \"openai/openai_token.txt\" is empty", Color(255, 50, 50))
     openai.print("Maybe you forgot to put the token?")
     return
+
 end
 
 -- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L369-L397
