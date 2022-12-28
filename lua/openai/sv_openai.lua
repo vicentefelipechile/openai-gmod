@@ -30,7 +30,7 @@ if file.Read("lua/openai_token.lua", "GAME") then
         return
     end
     
-elseif not APIKEY then
+else
 
     if file.Exists("openai_token.txt", "DATA") then
 
@@ -52,20 +52,30 @@ elseif not APIKEY then
 
     else
 
-        file.Write("openai/openai_token.txt", "Put your token here")
-        openai.print("Error \"openai/openai_token.txt\" doesn't found", Color(255, 50, 50))
-        openai.print("Creating one...")
-        openai.print("Next time you restart or change the map on your server")
-        openai.print("You must have put your token in \"garrysmod/data/openai/openai_token.txt\"")
-        return
+        if file.Exists("openai/openai_token.txt", "DATA") then
+
+            APIKEY = file.Read("openai/openai_token.txt", "DATA")
+    
+            if #APIKEY == 0 then
+
+                openai.print("Error \"openai/openai_token.txt\" is empty", Color(255, 50, 50))
+                openai.print("Maybe you forgot to put the token?")
+                return
+
+            end
+            
+        else
+
+            file.Write("openai/openai_token.txt", "Put your token here")
+            openai.print("Error \"openai/openai_token.txt\" doesn't found", Color(255, 50, 50))
+            openai.print("Creating one...")
+            openai.print("Next time you restart or change the map on your server")
+            openai.print("You must have put your token in \"garrysmod/data/openai/openai_token.txt\"")
+            return
+
+        end
 
     end
-
-elseif #APIKEY == 0 then
-
-    openai.print("Error \"openai/openai_token.txt\" is empty", Color(255, 50, 50))
-    openai.print("Maybe you forgot to put the token?")
-    return
 
 end
 
