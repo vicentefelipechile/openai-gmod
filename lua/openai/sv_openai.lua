@@ -13,6 +13,9 @@ openai.img = {
     [3] = "1024x1024",
 }
 
+local reqwestURL = "https://github.com/WilliamVenner/gmsv_reqwest/releases/download/"
+local reqwestVER = "v3.0.2"
+
 --[[---------------------------------------------------------
     Fallbacks
 -----------------------------------------------------------]]
@@ -79,42 +82,35 @@ else
 
 end
 
--- https://github.com/Facepunch/garrysmod/blob/master/garrysmod/lua/includes/extensions/util.lua#L369-L397
-local suffix = ({"osx64", "osx", "linux64", "linux", "win64", "win32"})[(system.IsWindows() and 4 or 0) + (system.IsLinux() and 2 or 0) + (jit.arch == "x86" and 1 or 0) + 1]
-local fmt    = "lua/bin/gm" .. (CLIENT and "cl" or "sv") .. "_%s_%s.dll"
-local function installed(name)
-    if file.Exists( string.format(fmt, name, suffix), "GAME" ) then return true end
-    if jit.version_num ~= 20004 and jit.arch == "x86" and system.IsLinux() then return file.Exists(string.format(fmt, name, "linux32"), "GAME") end
-    return false
-end
-
-if not installed("reqwest") then
+if not util.IsBinaryModuleInstalled("reqwest") then
     local version = "gmsv_reqwest_"
 
     if system.IsWindows() then
+
         version = version .. "win"
 
-        if jit.arch == "x64" then
-            version = version .. "64.dll"
-        else
-            version = version .. "32.dll"
-        end
+        version = jit.arch == "x64" and "64.dll" or "32.dll"
 
     elseif system.IsLinux() then
+
         version = version .. "linux"
 
-        if jit.arch == "x64" then
-            version = version .. "64.dll"
-        else
-            version = version .. ".dll"
-        end
+        version = jit.arch == "x64" and "64.dll" or ".dll"
+
     else
+
         version = "Unsupported"
+
     end
+
+    local download = version ~= "Unsupported" and reqwestURL .. reqwestVER .. "/" .. version or version
 
     openai.print("Error \"Reqwest\" Module isn't installed", Color(255, 50, 50))
     openai.print("Are you sure that is the correct version?")
     openai.print("You need to install this version: " .. version)
+    openai.print("")
+    openai.print("Dowload link: ")
+    openai.print(download, Color(150, 80, 255))
     return
 else
     require("reqwest")
