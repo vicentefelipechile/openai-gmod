@@ -1,4 +1,4 @@
-OpenAI = {}
+OpenAI = OpenAI or {}
 
 if SERVER then
     AddCSLuaFile("openai/sh_openai.lua")
