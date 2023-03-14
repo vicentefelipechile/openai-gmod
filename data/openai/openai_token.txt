@@ -1,1 +1,21 @@
-textos
+OpenAI: sk-XXXXXXXXXXXXXXXXXXXXX
+
+
+# Completions configuracion
+Completion_model: text-davinci-003
+Completion_suffix: none
+Completion_max_tokens: 16
+Completion_temperature: 1
+Completion_user: STEAM_[steamid]
+
+
+# Images configuracion
+Image_size: 256x256
+Image_user: STEAM_[steamid]
+
+
+
+# Formatos permitidos
+#
+# [steamid] = STEAM_X_XXXXXXXXXX
+# [steamid64] = 765XXXXXXXXXXXXX

@@ -1,3 +1,5 @@
+OpenAI = {}
+
 if SERVER then
     AddCSLuaFile("openai/sh_openai.lua")
     AddCSLuaFile("openai/cl_openai.lua")
