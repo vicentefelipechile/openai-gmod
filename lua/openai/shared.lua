@@ -12,7 +12,7 @@ end
 local cfg_folder = "openai"
 function OpenAI.FileReset()
 
-    local cfg_file = cfg_folder .. "/config.txt"
+    local cfg_file = cfg_folder .. "/openai_config.txt"
 
     if not file.Exists(cfg_folder, "DATA") then
         file.CreateDir(cfg_folder)
@@ -25,7 +25,7 @@ function OpenAI.FileReset()
     http.Fetch("https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_token.txt",
     
         function(body, _, _, code)
-            OpenAI.print(code .. " - Archivo de configuracion descargado con exito!!")
+            OpenAI.print(code, " - Archivo de configuracion descargado con exito!!")
             file.Write(cfg_file, body)
         end,
         
@@ -43,7 +43,7 @@ local start = string.StartsWith
 
 function OpenAI.FileRead()
     local cfg = {}
-    local cfg_file = file.Open("openai/openai_config.txt")
+    local cfg_file = file.Open(cfg_folder .. "/openai_config.txt")
 
     while not cfg_file:EndOfFile() do
         local line = trim( cfg_file:ReadLine() )
