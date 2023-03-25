@@ -38,11 +38,27 @@ function OpenAI.FileReset()
 
 end
 
+local trim = string.Trim
+local start = string.StartsWith
+
 function OpenAI.FileRead()
     local cfg = {}
-    local cfg_file = file.Open("")
+    local cfg_file = file.Open("openai/openai_config.txt")
 
-    while not  do
-        
+    while not cfg_file:EndOfFile() do
+        local line = trim( cfg_file:ReadLine() )
+
+        if line == "" then continue end
+        if string.sub(line, 1, 1) == "#" then continue end
+
+        local key, value = string.match(line, "(%S+):%s*(.*)")
+        if key == nil or value == nil then continue end
+
+        key, value = trim(key), trim(value)
+        value = tonumber(value) or value
+
+        cfg[string.lower(key)] = cfg[string.lower(key)] or value
     end
+
+    return cfg
 end
