@@ -22,7 +22,7 @@ function OpenAI.FileReset()
         file.Delete(cfg_file)
     end
 
-    http.Fetch("https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_token.txt",
+    http.Fetch("https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
     
         function(body, _, _, code)
             OpenAI.print(code, " - Archivo de configuracion descargado con exito!!")
