@@ -22,19 +22,22 @@ function OpenAI.FileReset()
         file.Delete(cfg_file)
     end
 
-    http.Fetch("https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
-    
-        function(body, _, _, code)
-            OpenAI.print(code, " - Archivo de configuracion descargado con exito!!")
-            file.Write(cfg_file, body)
-        end,
-        
-        function(msg)
-            OpenAI.print("Error al descargar el archivo:")
-            OpenAI.print(msg)
+    HTTP({
+        method          = "GET",
+        url             = "https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
+        success         = function(code, body)
+                            if code == 200 then
+                                OpenAI.print(code, " - Archivo de configuracion descargado con exito!!")
+                            else
+                                OpenAI.print(code, " - Error al descargar el archivo")
+                            end
+                            file.Write(cfg_file, body)
+                        end,
+        failed          = function(msg)
+                            OpenAI.print("Error al descargar el archivo:")
+                            OpenAI.print(msg)
         end
-
-    )
+    })
 
 end
 
@@ -43,7 +46,7 @@ local start = string.StartsWith
 
 function OpenAI.FileRead()
     local cfg = {}
-    local cfg_file = file.Open(cfg_folder .. "/openai_config.txt")
+    local cfg_file = file.Read(cfg_folder .. "/openai_config.txt", "DATA")
 
     while not cfg_file:EndOfFile() do
         local line = trim( cfg_file:ReadLine() )
