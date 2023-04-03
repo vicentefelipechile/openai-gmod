@@ -1,9 +1,9 @@
 function pMsg(msg)
-    OpenAI.print(c_normal, " : ", msg)
+    OpenAI.print(COLOR_SERVER, " : ", msg)
 end
 
 function pError(msg)
-    OpenAI.print(c_error, msg)
+    OpenAI.print(COLOR_RED, msg)
 end
 
 
