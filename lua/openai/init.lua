@@ -43,18 +43,21 @@ function OpenAI.JSONEncode(tbl)
 end
 
 
-function OpenAI.HTTP(request, onsuccess, onfailure, ply)
+function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
     if not REQUESTS[request] then OpenAI.print(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
 
     local method, url = REQUESTS[request][0], REQUESTS[request][1]
 
     reqwest({
-        method = method,
         url = url,
+        body = body or {},
+        method = method,
+        headers = headers or {},
+        type = "application/json",
 
         success = function(code, body, headers)
             if ( !onsuccess ) then return end
-            onsuccess( body, body:len(), headers, code )
+            onsuccess( code, body, headers )
         end,
       
         failed = function( err )
