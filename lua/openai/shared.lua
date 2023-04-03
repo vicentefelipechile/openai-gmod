@@ -9,8 +9,6 @@
 if SERVER then
     AddCSLuaFile("openai/modules/enum_color.lua")
     AddCSLuaFile("openai/modules/httpcode.lua")
-
-    include("openai/server/reqwest.lua")
 end
 include("openai/modules/enum_color.lua")
 include("openai/modules/httpcode.lua")
