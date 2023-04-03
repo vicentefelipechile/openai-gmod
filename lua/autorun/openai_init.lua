@@ -1,11 +1,11 @@
 OpenAI = OpenAI or {}
 
 if SERVER then
-    AddCSLuaFile("openai/sh_openai.lua")
-    AddCSLuaFile("openai/cl_openai.lua")
-    include("openai/sh_openai.lua")
-    include("openai/sv_openai.lua")
+    AddCSLuaFile("openai/shared.lua")
+    AddCSLuaFile("openai/cl_init.lua")
+    include("openai/shared.lua")
+    include("openai/init.lua")
 else
-    include("openai/sh_openai.lua")
-    include("openai/cl_openai.lua")
+    include("openai/shared.lua")
+    include("openai/cl_init.lua")
 end

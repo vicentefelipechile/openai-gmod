@@ -7,18 +7,22 @@
         Include Files
 ----------------------------]]--
 if SERVER then
-    AddCSLuaFile("openai/enum_color.lua")
+    AddCSLuaFile("openai/modules/enum_color.lua")
+    AddCSLuaFile("openai/modules/httpcode.lua")
+
+    include("openai/server/reqwest.lua")
 end
-include("openai/enum_color.lua")
+include("openai/modules/enum_color.lua")
+include("openai/modules/httpcode.lua")
 
 
 --[[----------------------------
         Shared Functions
 ----------------------------]]--
 function OpenAI.print(...)
-    local color = SERVER and Color(123, 250, 250) or Color(212, 250, 123)
+    local color = SERVER and COLOR_SERVER or COLOR_CLIENT
 
-    MsgC(color, unpack({...}))
+    MsgC(color, unpack({...}), "\n")
 end
 
 
