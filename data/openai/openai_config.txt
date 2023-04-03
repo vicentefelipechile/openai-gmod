@@ -34,4 +34,4 @@ Chat_user: STEAM_[steamid]
 
 
 # Discord Webhook
-Discord_webhook = https://discord.com/api/webhooks/
+Discord_webhook: https://discord.com/api/webhooks/
