@@ -17,17 +17,41 @@ local REQUESTS = {
 
 local c_ok = COLOR_GREEN
 local c_error = COLOR_RED
-local c_normal = COLOR_WHITE
+local c_normal = COLOR_SERVER
 local c_important = COLOR_MENU
 
 local folder = "openai"
 
-
+local cfg = OpenAI.FileRead()
 
 --[[------------------------
         Server Scripts
 ------------------------]]--
 
-function OpenAI.HTTP(request, info)
+function OpenAI.JSONEncode(tbl)
+    if not istable(tbl) then return end
+
+    local json = "{"
+
+    for k, v in pairs(tbl) do
+            json = isnumber(v) and json .. "\"" .. k .. "\":" .. v .. "," or json .. "\"" .. k .. "\":\"" .. v .. "\","
+    end
     
+    json = string.sub(json, 0, -2) .. "}"
+
+    return json
+end
+
+
+function OpenAI.HTTP(request, info, ply)
+    if not REQUESTS[request] then OpenAI.print(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
+
+    local method, url = REQUESTS[request][0], REQUESTS[request][1]
+
+    reqwest({
+        method = method,
+        url = url,
+
+
+    })
 end

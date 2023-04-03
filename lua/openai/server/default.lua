@@ -1,29 +1,17 @@
-OpenAI.default = OpenAI.default or {}
-OpenAI.default.chat = {}
-OpenAI.default.image = {}
-OpenAI.default.completions = {}
+OpenAI.default = OpenAI.default or {
 
-local defaultCompletions = {
-    model = "text-davinci-003",
-    suffix = nil,
-    max_tokens = 24,
-    temperature = 1,
-    user = "STEAM_[steamid]",
+    completion_model = "text-davinci-003",
+    completion_suffix = nil,
+    completion_max_tokens = 24,
+    completion_temperature = 1,
+    completion_user = "STEAM_[steamid]",
+
+    image_size = "256x256",
+    image_user = "STEAM_[steamid]",
+
+    image_model = "gpt-3.5-turbo",
+    image_message = "[{\"role\": \"user\", \"content\": \"[first_message]\"}]",
+    image_temperature = 1,
+    image_max_tokens = 24,
+    image_user = "STEAM_[steamid]",
 }
-
-local defaultImages = {
-    size = "256x256",
-    user = "STEAM_[steamid]",
-}
-
-local defaultChat = {
-    model = "gpt-3.5-turbo",
-    message = "[{\"role\": \"user\", \"content\": \"[first_message]\"}]",
-    temperature = 1,
-    max_tokens = 24,
-    user = "STEAM_[steamid]",
-}
-
-OpenAI.default.completions = defaultCompletions
-OpenAI.default.image = defaultImages
-OpenAI.default.chat = defaultChat

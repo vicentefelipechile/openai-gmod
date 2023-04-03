@@ -9,6 +9,7 @@
 if SERVER then
     AddCSLuaFile("openai/modules/enum_color.lua")
     AddCSLuaFile("openai/modules/httpcode.lua")
+    include("openai/server/default.lua")
 end
 include("openai/modules/enum_color.lua")
 include("openai/modules/httpcode.lua")
@@ -41,11 +42,9 @@ function OpenAI.FileReset()
         method          = "GET",
         url             = "https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
         success         = function(code, body)
-                            if code == 200 then
-                                OpenAI.print(code, " - Archivo de configuracion descargado con exito!!")
-                            else
-                                OpenAI.print(code, " - Error al descargar el archivo")
-                            end
+                            local fCode = OpenAI.HTTPcode[code] or function() OpenAI.print(code) end
+                            fCode()
+
                             file.Write(cfg_file, body)
                         end,
         failed          = function(msg)
@@ -56,6 +55,7 @@ function OpenAI.FileReset()
 
 end
 
+
 local trim = string.Trim
 local start = string.StartsWith
 
@@ -63,7 +63,7 @@ function OpenAI.FileRead()
     local cfg = {}
     local cfg_file = file.Read(cfg_folder .. "/openai_config.txt", "DATA")
 
-    if cfg_file == nil then return end
+    if cfg_file == nil then return OpenAI.default end
 
     while not cfg_file:EndOfFile() do
         local line = trim( cfg_file:ReadLine() )
@@ -74,10 +74,16 @@ function OpenAI.FileRead()
         local key, value = string.match(line, "(%S+):%s*(.*)")
         if key == nil or value == nil then continue end
 
-        key, value = trim(key), trim(value)
+        key, value = string.lower( trim(key) ), trim(value)
         value = tonumber(value) or value
 
-        cfg[string.lower(key)] = cfg[string.lower(key)] or value
+        cfg[key] = cfg[key] or value
+    end
+
+    for k, v in pairs( OpenAI.default ) do
+        if cfg[k] == nil then
+            cfg[k] = v
+        end
     end
 
     return cfg

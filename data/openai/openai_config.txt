@@ -18,7 +18,6 @@ Image_user: STEAM_[steamid]
 Chat_model: gpt-3.5-turbo
 Chat_message: [{"role": "user", "content": "[first_message]" }]
 Chat_temperature: 1
-Chat_top_p: 1
 Chat_max_tokens: 24
 Chat_user: STEAM_[steamid]
 
@@ -31,3 +30,8 @@ Chat_user: STEAM_[steamid]
 
 # Revisa mas aqui V
 # https://platform.openai.com/docs/models/model-endpoint-compatibility
+
+
+
+# Discord Webhook
+Discord_webhook = https://discord.com/api/webhooks/
