@@ -43,7 +43,7 @@ function OpenAI.JSONEncode(tbl)
 end
 
 
-function OpenAI.HTTP(request, info, ply)
+function OpenAI.HTTP(request, onsuccess, onfailure, ply)
     if not REQUESTS[request] then OpenAI.print(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
 
     local method, url = REQUESTS[request][0], REQUESTS[request][1]
@@ -52,6 +52,14 @@ function OpenAI.HTTP(request, info, ply)
         method = method,
         url = url,
 
-
+        success = function(code, body, headers)
+            if ( !onsuccess ) then return end
+            onsuccess( body, body:len(), headers, code )
+        end,
+      
+        failed = function( err )
+            if ( !onfailure ) then return end
+            onfailure( err )
+        end
     })
 end
