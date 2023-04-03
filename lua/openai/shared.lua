@@ -2,10 +2,23 @@
                                 Shared OpenAI
 ----------------------------------------------------------------------------]]--
 
-function OpenAI.print(...)
-    local color = color or SERVER and Color(123, 250, 250) or Color(212, 250, 123)
 
-    MsgC(Color(255, 255, 255), unpack({...}))
+--[[----------------------------
+        Include Files
+----------------------------]]--
+if SERVER then
+    AddCSLuaFile("openai/enum_color.lua")
+end
+include("openai/enum_color.lua")
+
+
+--[[----------------------------
+        Shared Functions
+----------------------------]]--
+function OpenAI.print(...)
+    local color = SERVER and Color(123, 250, 250) or Color(212, 250, 123)
+
+    MsgC(color, unpack({...}))
 end
 
 
@@ -47,6 +60,8 @@ local start = string.StartsWith
 function OpenAI.FileRead()
     local cfg = {}
     local cfg_file = file.Read(cfg_folder .. "/openai_config.txt", "DATA")
+
+    if cfg_file == nil then return end
 
     while not cfg_file:EndOfFile() do
         local line = trim( cfg_file:ReadLine() )
