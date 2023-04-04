@@ -1,5 +1,5 @@
 function pMsg(msg)
-    MsgC(COLOR_SERVER, " : ", msg)
+    MsgC(COLOR_SERVER, " : ", msg, "\n")
 end
 
 function pError(msg)
