@@ -2,20 +2,17 @@
       Local Definitions
 ------------------------]]--
 
-local c_ok = COLOR_GREEN
-local c_error = COLOR_RED
-local c_normal = COLOR_SERVER
-local c_important = COLOR_MENU
+local N = "\n"
 
-local reqwesturl = "https://github.com/WilliamVenner/gmsv_reqwest/releases/tag/v3.0.2/"
-local cfg_folder = "openai"
+local reqwesturl = "https://github.com/WilliamVenner/gmsv_reqwest/releases/download/v3.0.2/"
+local folder = "openai"
 
 
 --[[------------------------
         Server Scripts
 ------------------------]]--
 function OpenAI.BinaryModule(message)
-    message = message or true
+    message = message == nil and true or false
 
     if util.IsBinaryModuleInstalled("reqwest") then
         require("reqwest")
@@ -26,20 +23,22 @@ function OpenAI.BinaryModule(message)
 
     if system.IsWindows() then
         version = version .. "win"
-        version = jit.arch == "x64" and "64.dll" or "32.dll"
+        version = jit.arch == "x64" and version .. "64.dll" or version .. "32.dll"
     elseif system.IsLinux() then
         version = version .. "linux"
-        version = jit.arch == "x64" and "64.dll" or ".dll"
+        version = jit.arch == "x64" and version .. "64.dll" or version .. ".dll"
     else
         version = "Unsupported"
     end
 
     if message then
-        OpenAI.print(c_error, "ERROR", c_normal, ": You don't have '", c_important, "reqwest", c_normal, "' module installed")
-        OpenAI.print("Get one in this page:")
-        OpenAI.print(c_important, "https://github.com/WilliamVenner/gmsv_reqwest/releases")
-        OpenAI.print("And download this file for your server: ", c_important, version)
-        OpenAI.print("Or just run this command ", c_important, "openai_downloadmodule", c_normal, "to get the file")
+        MsgC(COLOR_WHITE, " ================ ", COLOR_CYAN, "OpenAI", COLOR_WHITE, " ================ ", N)
+        MsgC(COLOR_RED, "ERROR", COLOR_SERVER, ": You don't have '", COLOR_MENU, "reqwest", COLOR_SERVER, "' module installed", N)
+        MsgC("Get one in this page:", N)
+        MsgC(COLOR_MENU, "https://github.com/WilliamVenner/gmsv_reqwest/releases", N)
+        MsgC("And download this file for your server: ", COLOR_MENU, version, N)
+        MsgC("Or just run this command ", COLOR_MENU, "openai_downloadmodule", COLOR_SERVER, " to get the file", N)
+        MsgC(COLOR_WHITE, " ================ ", COLOR_CYAN, "OpenAI", COLOR_WHITE, " ================ ", N)
     end
 
     return version
@@ -51,8 +50,8 @@ function OpenAI.DownloadBinaryModule()
 
     local bin_file = OpenAI.BinaryModule(false)
 
-    if not file.Exists(cfg_folder) then
-        file.CreateDir(cfg_folder)
+    if not file.Exists(folder, "DATA") then
+        file.CreateDir(folder)
     end
 
     HTTP({
@@ -60,21 +59,21 @@ function OpenAI.DownloadBinaryModule()
         url = reqwesturl .. bin_file,
 
         success = function(code, bin)
-            local fCode = OpenAI.HTTPcode[code] or function() OpenAI.print(code) end
+            local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
             fCode()
 
             if code == 200 then
-                file.Write(cfg_folder .. "/" .. bin_file .. ".dat", bin)
+                file.Write(folder .. "/" .. bin_file .. ".dat", bin)
             end
         end,
 
         failed = function(msg)
-            OpenAI.print("Error al descargar el archivo:")
-            OpenAI.print(msg)
+            MsgC("Error al descargar el archivo:")
+            MsgC(msg)
         end
     })
 end
-concommand.Add("openai_downloadmodule", OpenAI.DownloadBinaryModule, nil, "Download the module")
+concommand.Add("openai_downloadmodule", function() OpenAI.DownloadBinaryModule(false) end, nil, "Download the module")
 
 
 OpenAI.BinaryModule()

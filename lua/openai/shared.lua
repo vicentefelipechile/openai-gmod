@@ -16,7 +16,6 @@ if SERVER then
 end
 include("openai/modules/enum_color.lua")
 include("openai/modules/httpcode.lua")
-include("openai/modules/chat.lua")
 
 
 --[[----------------------------
@@ -58,6 +57,14 @@ function OpenAI.FileReset()
 
 end
 
+concommand.Add("openai_config_reset", OpenAI.FileReset, _, "Reinicia el archivo de configuracion")
+
+do
+    if not file.Exists(cfg_folder .. "/openai_config.txt", "DATA") then
+        OpenAI.FileReset()
+    end
+end
+
 
 local trim = string.Trim
 local start = string.StartsWith
@@ -92,3 +99,8 @@ function OpenAI.FileRead()
 
     return cfg
 end
+
+--[[----------------------------
+        Post-Include Files
+----------------------------]]--
+include("openai/modules/chat.lua")

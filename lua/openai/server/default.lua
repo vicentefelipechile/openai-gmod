@@ -9,9 +9,9 @@ OpenAI.default = OpenAI.default or {
     image_size = "256x256",
     image_user = "STEAM_[steamid]",
 
-    image_model = "gpt-3.5-turbo",
-    image_message = "[{\"role\": \"user\", \"content\": \"[first_message]\"}]",
-    image_temperature = 1,
-    image_max_tokens = 24,
-    image_user = "STEAM_[steamid]",
+    chat_model = "gpt-3.5-turbo",
+    chat_message = "[{\"role\": \"user\", \"content\": \"[first_message]\"}]",
+    chat_temperature = 1,
+    chat_max_tokens = 24,
+    chat_user = "STEAM_[steamid]",
 }

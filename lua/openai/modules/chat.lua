@@ -48,7 +48,7 @@ local function replaceSteamID(text, ply)
 end
 
 do
-    if not file.Exists("openai/chat") then
+    if not file.Exists("openai/chat", "DATA") then
         file.CreateDir("openai/chat")
     end
 end
@@ -61,7 +61,7 @@ end
 function OpenAI.GetPlayerChat(ply)
     local messages
 
-    if not file.Exists("openai/chat/log_" .. ply:SteamID64() .. ".json") then
+    if not file.Exists("openai/chat/log_" .. ply:SteamID64() .. ".json", "DATA") then
         file.Write("openai/chat/log_" .. ply:SteamID64() .. ".json", "")
     end
 end
