@@ -68,8 +68,7 @@ function OpenAI.FileRead()
     while not cfg_file:EndOfFile() do
         local line = trim( cfg_file:ReadLine() )
 
-        if line == "" then continue end
-        if string.sub(line, 1, 1) == "#" then continue end
+        if line == "" or string.sub(line, 1, 1) == "#" then continue end
 
         local key, value = string.match(line, "(%S+):%s*(.*)")
         if key == nil or value == nil then continue end
@@ -79,6 +78,8 @@ function OpenAI.FileRead()
 
         cfg[key] = cfg[key] or value
     end
+
+    cfg_file:Close()
 
     for k, v in pairs( OpenAI.default ) do
         if cfg[k] == nil then

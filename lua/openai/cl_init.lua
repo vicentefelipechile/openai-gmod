@@ -2,5 +2,5 @@
                                 Client-Side OpenAI
 ----------------------------------------------------------------------------]]--
 
-CreateClientConVar("openai_downloadimg", 1, true, true, "Deberias descargar las imagenes del servidor?")
+CreateConVar("openai_downloadimg", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Deberias descargar las imagenes del servidor?", 0, 1)
 
