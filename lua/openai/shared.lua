@@ -71,7 +71,7 @@ local start = string.StartsWith
 
 function OpenAI.FileRead()
     local cfg = {}
-    local cfg_file = file.Read(cfg_folder .. "/openai_config.txt", "r", "DATA")
+    local cfg_file = file.Open(cfg_folder .. "/openai_config.txt", "r", "DATA")
 
     if cfg_file == nil then return OpenAI.default end
 
