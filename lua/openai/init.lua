@@ -15,6 +15,8 @@ local REQUESTS = {
     ["images"]      = {"POST", "https://api.openai.com/v1/images/generations"},     -- https://platform.openai.com/docs/api-reference/images
 }
 
+OpenAI.REQUESTS = REQUESTS
+
 local c_ok = COLOR_GREEN
 local c_error = COLOR_RED
 local c_normal = COLOR_SERVER
@@ -46,7 +48,7 @@ end
 function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
     if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
 
-    local method, url = REQUESTS[request][0], REQUESTS[request][1]
+    local method, url = REQUESTS[request][1], REQUESTS[request][2]
 
     reqwest({
         url = url,

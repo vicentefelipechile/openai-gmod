@@ -96,7 +96,7 @@ function OpenAI.chatFetch(ply, msg)
         end
     end,
     function(err)
-        MsgC(c_error, err)
+        MsgC(COLOR_RED, err)
     end)
 end
 
