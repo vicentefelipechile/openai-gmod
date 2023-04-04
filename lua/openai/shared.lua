@@ -10,9 +10,12 @@ if SERVER then
     AddCSLuaFile("openai/modules/enum_color.lua")
     AddCSLuaFile("openai/modules/httpcode.lua")
     include("openai/server/default.lua")
+
+    AddCSLuaFile("openai/modules/chat.lua")
 end
 include("openai/modules/enum_color.lua")
 include("openai/modules/httpcode.lua")
+include("openai/modules/chat.lua")
 
 
 --[[----------------------------
@@ -23,7 +26,6 @@ function OpenAI.print(...)
 
     MsgC(color, unpack({...}), "\n")
 end
-
 
 local cfg_folder = "openai"
 function OpenAI.FileReset()

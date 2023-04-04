@@ -34,7 +34,7 @@ function OpenAI.JSONEncode(tbl)
     local json = "{"
 
     for k, v in pairs(tbl) do
-            json = isnumber(v) and json .. "\"" .. k .. "\":" .. v .. "," or json .. "\"" .. k .. "\":\"" .. v .. "\","
+        json = isnumber(v) and json .. "\"" .. k .. "\":" .. v .. "," or json .. "\"" .. k .. "\":\"" .. v .. "\","
     end
     
     json = string.sub(json, 0, -2) .. "}"
