@@ -44,7 +44,7 @@ end
 
 
 function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
-    if not REQUESTS[request] then OpenAI.print(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
+    if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
 
     local method, url = REQUESTS[request][0], REQUESTS[request][1]
 

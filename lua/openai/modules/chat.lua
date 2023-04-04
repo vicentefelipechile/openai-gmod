@@ -80,7 +80,7 @@ function OpenAI.chatFetch(ply, msg)
     local jsonBody = OpenAI.JSONEncode(body)
 
     OpenAI.HTTP("chat", jsonBody, header, function(code, body)
-        local fCode = OpenAI.HTTPcode[code] or function() OpenAI.print(code) end
+        local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
         fCode()
 
         if code == 200 then
@@ -96,7 +96,7 @@ function OpenAI.chatFetch(ply, msg)
         end
     end,
     function(err)
-        OpenAI.print(c_error, err)
+        MsgC(c_error, err)
     end)
 end
 
