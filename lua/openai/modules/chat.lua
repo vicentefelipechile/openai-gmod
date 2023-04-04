@@ -71,7 +71,7 @@ function OpenAI.chatFetch(ply, msg)
 
     local body = {
         model       = cfg["chat_model"],
-        messages    = string.gsub(cfg["message"], "%[first_message%]", msg),
+        messages    = string.gsub(cfg["chat_message"], "%[first_message%]", msg),
         temperature = cfg["chat_temperature"],
         max_tokens  = cfg["chat_max_tokens"],
         user        = replaceSteamID( cfg["chat_user"], ply ),
