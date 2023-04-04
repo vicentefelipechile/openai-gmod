@@ -30,21 +30,6 @@ local cfg = OpenAI.FileRead()
         Server Scripts
 ------------------------]]--
 
-function OpenAI.JSONEncode(tbl)
-    if not istable(tbl) then return end
-
-    local json = "{"
-
-    for k, v in pairs(tbl) do
-        json = isnumber(v) and json .. "\"" .. k .. "\":" .. v .. "," or json .. "\"" .. k .. "\":\"" .. v .. "\","
-    end
-    
-    json = string.sub(json, 0, -2) .. "}"
-
-    return json
-end
-
-
 function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
     if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
 
@@ -52,7 +37,7 @@ function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
 
     reqwest({
         url = url,
-        body = body or {},
+        body = body or util.TableToJSON({}),
         method = method,
         headers = headers or {},
         type = "application/json",

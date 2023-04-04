@@ -84,7 +84,6 @@ function OpenAI.FileRead()
         if key == nil or value == nil then continue end
 
         key, value = string.lower( trim(key) ), trim(value)
-        value = tonumber(value) or value
 
         cfg[key] = cfg[key] or value
     end

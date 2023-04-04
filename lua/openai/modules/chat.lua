@@ -71,13 +71,18 @@ function OpenAI.chatFetch(ply, msg)
 
     local body = {
         model       = cfg["chat_model"],
-        messages    = string.gsub(cfg["chat_message"], "%[first_message%]", msg),
+        messages    = {
+            role = "user",
+            content = msg
+        },
+        --messages    = string.gsub(cfg["chat_message"], "%[first_message%]", msg),
         temperature = cfg["chat_temperature"],
         max_tokens  = cfg["chat_max_tokens"],
         user        = replaceSteamID( cfg["chat_user"], ply ),
     }
 
-    local jsonBody = OpenAI.JSONEncode(body)
+    local jsonBody = util.TableToJSON(body)
+    print(jsonBody)
 
     OpenAI.HTTP("chat", jsonBody, header, function(code, body)
         local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
