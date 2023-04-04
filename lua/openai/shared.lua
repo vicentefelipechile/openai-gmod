@@ -44,14 +44,14 @@ function OpenAI.FileReset()
         method          = "GET",
         url             = "https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
         success         = function(code, body)
-                            local fCode = OpenAI.HTTPcode[code] or function() OpenAI.print(code) end
+                            local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
                             fCode()
 
                             file.Write(cfg_file, body)
                         end,
         failed          = function(msg)
-                            OpenAI.print("Error al descargar el archivo:")
-                            OpenAI.print(msg)
+                            MsgC("Error al descargar el archivo:")
+                            MsgC(msg)
         end
     })
 
@@ -71,7 +71,7 @@ local start = string.StartsWith
 
 function OpenAI.FileRead()
     local cfg = {}
-    local cfg_file = file.Read(cfg_folder .. "/openai_config.txt", "DATA")
+    local cfg_file = file.Read(cfg_folder .. "/openai_config.txt", "r", "DATA")
 
     if cfg_file == nil then return OpenAI.default end
 
