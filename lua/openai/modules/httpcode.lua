@@ -3,12 +3,12 @@ function pMsg(msg)
 end
 
 function pError(msg)
-    MsgC(COLOR_WHITE, "[" COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, msg)
+    MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, msg)
 end
 
 
 OpenAI.HTTPcode = {
-    [200] = function() MsgC(COLOR_WHITE, "[" COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_GREEN, "200 - OK") pMsg("The resource has been obtained") end,
+    [200] = function() MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_GREEN, "200 - OK") pMsg("The resource has been obtained") end,
 
     [400] = function() pError("400 - Bad Request") pMsg("The server was unable to interpret the request given invalid syntax") end,
     [401] = function() pError("401 - Unauthorized") pMsg("Authentication is required to get the requested response") end,
