@@ -85,7 +85,7 @@ end
         Main Scripts
 ------------------------]]--
 
-function OpenAI.chatFetch(ply, msg)
+function OpenAI.imageFetch(ply, msg)
     if not API then return end
 
     local body = {
@@ -103,7 +103,7 @@ function OpenAI.chatFetch(ply, msg)
         if code == 200 then
             json = util.JSONToTable( string.Trim( body ) )
 
-            local response = json["data"][0][url]
+            local response = json["data"][1]["url"]
 
             net.Start("openai.imageSVtoCL")
                 net.WriteEntity(ply)
@@ -116,3 +116,57 @@ function OpenAI.chatFetch(ply, msg)
         MsgC(COLOR_RED, err)
     end)
 end
+
+
+concommand.Add("openai_image_reloadconfig", function()
+    cfg = OpenAI.FileRead()
+end)
+
+
+--[[------------------------
+      Commands Scripts
+------------------------]]--
+
+local cases = {
+    [0] = function(ply, prompt)
+        if ulx then
+            return
+        else
+            OpenAI.imageFetch(ply, prompt)
+        end
+    end,
+
+    [1] = function(ply, prompt)
+        OpenAI.imageFetch(ply, prompt)
+    end,
+
+    [2] = function(ply, prompt)
+        if ply:IsAdmin() then
+            OpenAI.imageFetch(ply, prompt)
+        end
+    end,
+
+    [3] = function(ply, prompt)
+        if ply:IsSuperAdmin() then
+            OpenAI.imageFetch(ply, prompt)
+        end
+    end,
+
+    [4] = function(ply, prompt)
+        
+    end
+}
+
+CreateConVar("openai_image_noshow", 1, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
+hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
+
+    local cmd, prompt = OpenAI.handleCommands(text)
+    if cmd == nil or cmd ~= "dalle" then return end
+    
+    local permissionType = GetConVar("openai_admin"):GetInt()
+    local fn = cases[permissionType] or function() end
+
+    fn(ply, prompt)
+
+    return GetConVar("openai_image_noshow"):GetBool() and "" or text
+end)
