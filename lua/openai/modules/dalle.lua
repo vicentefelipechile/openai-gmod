@@ -157,7 +157,7 @@ local cases = {
     end
 }
 
-CreateConVar("openai_image_noshow", 1, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
+CreateConVar("openai_image_noshow", 0, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
 hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
     local cmd, prompt = OpenAI.handleCommands(text)

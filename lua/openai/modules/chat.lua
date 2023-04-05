@@ -140,6 +140,7 @@ CreateConVar("openai_chat_noshow", 1, FCVAR_ARCHIVE, "Should show the command in
 hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
     local cmd, prompt = OpenAI.handleCommands(text)
+
     if cmd == nil or cmd ~= "chat" then return end
     
     local permissionType = GetConVar("openai_admin"):GetInt()
