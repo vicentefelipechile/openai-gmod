@@ -1,8 +1,8 @@
-function pMsg(msg)
+local function pMsg(msg)
     MsgC(COLOR_SERVER, " : ", msg, "\n")
 end
 
-function pError(msg)
+local function pError(msg)
     MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, msg)
 end
 
@@ -19,5 +19,5 @@ OpenAI.HTTPcode = {
     [409] = function() pError("409 - Conflict") pMsg("The server encountered a conflict with the request sent with the current state of the server") end,
     [410] = function() pError("410 - Gone") pMsg("The requested content has been deleted from the server") end,
     [411] = function() pError("411 - Length Required") pMsg("The server rejected the request because the Content-Length is not defined") end,
-    [429] = function() pError("429 - Length Required") pMsg("The user has sent too many requests") end,
+    [429] = function() pError("429 - Too Many Requests") pMsg("The user has sent too many requests") end,
 }

@@ -75,8 +75,7 @@ function OpenAI.chatFetch(ply, msg)
             role = "user",
             content = msg
         },
-        --messages    = string.gsub(cfg["chat_message"], "%[first_message%]", msg),
-        temperature = cfg["chat_temperature"],
+        temperature = tonumber(cfg["chat_temperature"]),
         max_tokens  = cfg["chat_max_tokens"],
         user        = replaceSteamID( cfg["chat_user"], ply ),
     }
@@ -97,7 +96,11 @@ function OpenAI.chatFetch(ply, msg)
                 net.WriteString(msg)
                 net.WriteString(response)
             net.Broadcast()
+        elseif code == 400 then
+            mError = json["error"]["message"]
+            MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError)
         end
+
     end,
     function(err)
         MsgC(COLOR_RED, err)
