@@ -54,3 +54,30 @@ function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
         end
     })
 end
+
+
+function OpenAI.IntToJson(field, json)
+    local pattern = [["]] .. field .. [[":(%d+%.?%d*)]]
+    local fieldValue = string.match(json, pattern)
+
+    if fieldValue then
+        local fieldNumber = tonumber(fieldValue)
+        fieldNumber = math.floor(fieldNumber)
+        local convertedJsonString = string.gsub(json, pattern, [["]] .. field .. [[":]] .. fieldNumber)
+        return convertedJsonString
+    else
+        return json
+    end
+end
+
+function OpenAI.replaceSteamID(text, ply)
+    if string.find(text, "%[steamid%]") then
+        text = string.gsub(text, "%[steamid%]", ply:SteamID())
+    end
+
+    if string.find(text, "%[steamid64%]") then
+        text = string.gsub(text, "%[steamid64%]", ply:SteamID64())
+    end
+
+    return text
+end

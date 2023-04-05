@@ -37,18 +37,6 @@ local header = API and {
 local c_error = COLOR_RED
 local c_normal = COLOR_SERVER
 
-local function replaceSteamID(text, ply)
-    if string.find(text, "%[steamid%]") then
-    text = string.gsub(text, "%[steamid%]", ply:SteamID())
-    end
-
-    if string.find(text, "%[steamid64%]") then
-    text = string.gsub(text, "%[steamid64%]", ply:SteamID64())
-    end
-
-    return text
-end
-
 
 local function getPlayersToSend()
     local tbl = {}
@@ -71,7 +59,7 @@ function OpenAI.chatFetch(ply, msg)
 
     local body = {
         size    = cfg["image_size"]
-        user    = replaceSteamID( cfg["image_user"], ply ),
+        user    = OpenAI.replaceSteamID( cfg["image_user"], ply ),
     }
 
     local jsonBody = util.TableToJSON(body)

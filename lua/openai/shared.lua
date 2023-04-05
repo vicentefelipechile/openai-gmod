@@ -1,6 +1,9 @@
 --[[----------------------------------------------------------------------------
                                 Shared OpenAI
 ----------------------------------------------------------------------------]]--
+OpenAI.Commands = OpenAI.Commands or {}
+
+CreateConVar("openai_admin", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "What type of admin we should to use? (0: Auto, 1: All-Users, 2: Only Admin, 3: Only SuperAdmin, 4: ULX)")
 
 
 --[[----------------------------
@@ -26,6 +29,20 @@ function OpenAI.print(...)
 
     MsgC(color, unpack({...}), "\n")
 end
+
+
+function OpenAI.handleCommands(str)
+    local command, value = str:match("^(%S+)%s+(.*)$")
+
+    if command and command:sub(1,1) == "!" then
+        command = command:sub(2)
+    else
+        return nil
+    end
+
+    return command, value
+end
+
 
 local cfg_folder = "openai"
 function OpenAI.FileReset()
@@ -98,6 +115,7 @@ function OpenAI.FileRead()
 
     return cfg
 end
+
 
 --[[----------------------------
         Post-Include Files
