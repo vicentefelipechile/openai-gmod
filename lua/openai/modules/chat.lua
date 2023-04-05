@@ -82,7 +82,6 @@ function OpenAI.chatFetch(ply, msg)
     }
 
     local jsonBody = util.TableToJSON(body)
-    print(jsonBody)
 
     OpenAI.HTTP("chat", jsonBody, header, function(code, body)
         local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
@@ -103,16 +102,4 @@ function OpenAI.chatFetch(ply, msg)
     function(err)
         MsgC(COLOR_RED, err)
     end)
-end
-
-
-function OpenAI.handleChat(ply, str)
-
-end
-
-
-do
-    if ULib then
-        
-    end
 end
