@@ -14,4 +14,7 @@ OpenAI.default = OpenAI.default or {
     chat_temperature = 1,
     chat_max_tokens = 24,
     chat_user = "STEAM_[steamid]",
+
+    discord_avatar = "https://i.imgur.com/wmTcTkk.png",
+    discord_name = "OpenAI"
 }
