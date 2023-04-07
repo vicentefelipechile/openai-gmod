@@ -28,7 +28,7 @@ function OpenAI.discordSendMessage(tbl)
         url = cfg["discord_webhook"],
         timeout = 20,
 
-        body = util.JSONToTable(tbl),
+        body = util.TableToJSON(tbl),
         type = "application/json",
 
         headers = {
