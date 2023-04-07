@@ -127,5 +127,5 @@ end
 include("openai/modules/chat.lua")
 include("openai/modules/dalle.lua")
 if SERVER then
-    -- include("openai/server/discord.lua")
+    include("openai/server/discord.lua")
 end
