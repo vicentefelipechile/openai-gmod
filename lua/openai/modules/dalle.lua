@@ -85,6 +85,7 @@ end
         Main Scripts
 ------------------------]]--
 
+local download = CreateConVar("openai_image_downloadserver", 1, FCVAR_ARCHIVE, "Should the server download the images?", 0, 1)
 function OpenAI.imageFetch(ply, msg)
     if not API then return end
 
@@ -110,6 +111,8 @@ function OpenAI.imageFetch(ply, msg)
                 net.WriteString(response)
                 net.WriteString(msg)
             net.Send( getPlayersToSend() )
+
+            hook.Call("OpenAI.imageFetch", nil, ply, msg, response)
         end
     end,
     function(err)
@@ -157,7 +160,8 @@ local cases = {
     end
 }
 
-CreateConVar("openai_image_noshow", 0, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
+
+local image_show = CreateConVar("openai_image_noshow", 0, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
 hook.Add("PlayerSay", "OpenAI.image", function(ply, text)
 
     local cmd, prompt = OpenAI.handleCommands(text)
@@ -168,5 +172,5 @@ hook.Add("PlayerSay", "OpenAI.image", function(ply, text)
 
     fn(ply, prompt)
 
-    return GetConVar("openai_image_noshow"):GetBool() and "" or text
+    return image_show:GetBool() and "" or text
 end)

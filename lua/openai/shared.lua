@@ -77,13 +77,14 @@ function OpenAI.FileReset()
 
 end
 
-concommand.Add("openai_config_reset", OpenAI.FileReset, _, "Reinicia el archivo de configuracion")
+if SERVER then
+    concommand.Add("openai_config_reset", OpenAI.FileReset, _, "Reinicia el archivo de configuracion")
 
-do
     if not file.Exists(cfg_folder .. "/openai_config.txt", "DATA") then
         OpenAI.FileReset()
     end
 end
+
 
 
 local trim = string.Trim

@@ -85,6 +85,8 @@ function OpenAI.chatFetch(ply, msg)
                 net.WriteString(msg)
                 net.WriteString(response)
             net.Broadcast()
+
+            hook.Call("OpenAI.chatFetch", nil, ply, msg, response)
         elseif code == 400 then
             mError = json["error"]["message"]
             MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
@@ -136,7 +138,7 @@ local cases = {
     end
 }
 
-CreateConVar("openai_chat_noshow", 1, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
+local noshow = CreateConVar("openai_chat_noshow", 1, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
 hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
     local cmd, prompt = OpenAI.handleCommands(text)
@@ -148,5 +150,5 @@ hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
     fn(ply, prompt)
 
-    return GetConVar("openai_chat_noshow"):GetBool() and "" or text
+    return noshow:GetBool() and "" or text
 end)

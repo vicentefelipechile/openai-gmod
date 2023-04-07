@@ -35,3 +35,5 @@ Chat_user: STEAM_[steamid]
 
 # Discord Webhook
 Discord_webhook: https://discord.com/api/webhooks/
+Discord_avatar: https://i.imgur.com/wmTcTkk.png
+Discord_name: OpenAI
