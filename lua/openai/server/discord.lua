@@ -58,7 +58,7 @@ hook.Add("OpenAI.chatFetch", "OpenAI.discord_chat", function(ply, prompt, respon
         content = nil,
         embeds = {
             {
-                description = string.format( [[```[%s]: %s\n[%s]: %s```]], ply:Nick(), prompt, cfg["discord_name"], response ),
+                description = string.format( [[```[%s]: %s``` ```[%s]: %s```]], ply:Nick(), prompt, cfg["discord_name"], response ),
                 color = 5814783,
                 timestamp = getDate()
             }
@@ -86,7 +86,7 @@ hook.Add("OpenAI.imageFetch", "OpenAI.discord_image", function(ply, prompt, resp
         content = nil,
         embeds = {
             {
-                description = string.format( [[```[%s]: %s\n[%s]: %s```]], ply:Nick(), prompt, cfg["discord_name"] ),
+                description = string.format( [[```[%s]: %s``` ```[%s]: %s```]], ply:Nick(), prompt, cfg["discord_name"] ),
                 color = 5814783,
                 timestamp = getDate(),
                 image = {
