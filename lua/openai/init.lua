@@ -41,7 +41,7 @@ function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
         method = method,
         headers = headers or {},
         type = "application/json",
-        timeout = 10,
+        timeout = 25,
 
         success = function(code, body, headers)
             if ( !onsuccess ) then return end
