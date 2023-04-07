@@ -63,11 +63,9 @@ hook.Add("OpenAI.chatFetch", "OpenAI.discord_chat", function(ply, prompt, respon
                 timestamp = getDate()
             }
         },
-        username = cfg["discord_name"],
-        avatar_url = cfg["discord_avatar"]
     }
 
-    if GetConVar("openai_discord_usedefaultwebhookinfo"):GetBool() then
+    if not defaultinfo:GetBool() then
         body["username"] = cfg["discord_name"]
         body["avatar_url"] = cfg["discord_avatar"]
     end
@@ -94,11 +92,9 @@ hook.Add("OpenAI.imageFetch", "OpenAI.discord_image", function(ply, prompt, resp
                 }
             }
         },
-        username = cfg["discord_name"],
-        avatar_url = cfg["discord_avatar"]
     }
 
-    if defaultinfo:GetBool() then
+    if not defaultinfo:GetBool() then
         body["username"] = cfg["discord_name"]
         body["avatar_url"] = cfg["discord_avatar"]
     end
