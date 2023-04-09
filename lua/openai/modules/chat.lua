@@ -16,6 +16,8 @@ if CLIENT then
 
         OpenAI.chatPrint("[Chat] ", COLOR_WHITE, ply:Nick(), ": ", COLOR_CLIENT, prompt)
         OpenAI.chatPrint("[Chat] ", COLOR_WHITE, "OpenAI: ", response)
+
+        hook.Call("OpenAI.onChatReceive", nil, ply, prompt, response)
     end)
 
     return

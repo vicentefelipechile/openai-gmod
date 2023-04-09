@@ -48,6 +48,8 @@ if CLIENT then
                 end
             end
         })
+
+        hook.Call("OpenAI.onImageReceive", nil, ply, url, prompt)
     end)
 
     return
