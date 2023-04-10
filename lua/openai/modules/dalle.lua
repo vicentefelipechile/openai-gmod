@@ -93,6 +93,9 @@ local download = CreateConVar("openai_image_downloadserver", 1, FCVAR_ARCHIVE, "
 function OpenAI.imageFetch(ply, msg)
     if not API then return end
 
+    local canUse = hook.Run("OpenAI.imagePlyCanUse", ply)
+    if canUse == false then return end
+
     local body = {
         prompt  = msg,
         size    = cfg["image_size"],

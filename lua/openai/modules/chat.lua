@@ -61,6 +61,9 @@ end
 function OpenAI.chatFetch(ply, msg)
     if not API then return end
 
+    local canUse = hook.Run("OpenAI.chatPlyCanUse", ply)
+    if canUse == false then return end
+
     local body = {
         model       = cfg["chat_model"],
         messages    = {{
