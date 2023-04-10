@@ -108,9 +108,9 @@ function OpenAI.imageFetch(ply, msg)
         local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
         fCode()
 
-        if code == 200 then
-            json = util.JSONToTable( string.Trim( body ) )
+        local json = util.JSONToTable( string.Trim( body ) )
 
+        if code == 200 then
             local response = json["data"][1]["url"]
 
             net.Start("openai.imageSVtoCL")
@@ -120,6 +120,16 @@ function OpenAI.imageFetch(ply, msg)
             net.Send( getPlayersToSend() )
 
             hook.Call("OpenAI.imageFetch", nil, ply, msg, response)
+        elseif code == 400 then
+            mError = json["error"]["message"]
+            MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
+
+            if GetConVar("openai_displayerrorcl"):GetBool() then
+                net.Start("OpenAI.errorToCL")
+                    net.WriteString(json["error"]["message"])
+                net.Send(ply)
+            end
+
         end
     end,
     function(err)

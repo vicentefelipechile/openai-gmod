@@ -2,6 +2,7 @@
                                 Server-side OpenAI
 ----------------------------------------------------------------------------]]--
 
+util.AddNetworkString("OpenAI.errorToCL")
 include("openai/server/reqwest.lua")
 
 --[[------------------------
