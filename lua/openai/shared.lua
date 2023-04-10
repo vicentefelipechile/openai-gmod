@@ -41,8 +41,6 @@ function OpenAI.handleCommands(str)
         return nil
     end
 
-    print(command, value)
-
     return command, value
 end
 
