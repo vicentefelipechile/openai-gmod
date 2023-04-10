@@ -22,7 +22,7 @@ if SERVER then
  
 elseif CLIENT then
 
-  hook.Call("OpenAI.onChatReceive", "OpenAI.onChatReceive", function(ply, prompt, response)
+  hook.Add("OpenAI.onChatReceive", "OpenAI.onChatReceive", function(ply, prompt, response)
     -- Your code
   end)
   
@@ -44,11 +44,11 @@ if SERVER then
  
 elseif CLIENT then
 
-  hook.Call("OpenAI.onImageReceive", "OpenAI.onImageReceive", function(ply, prompt, url)
+  hook.Add("OpenAI.onImageReceive", "OpenAI.onImageReceive", function(ply, prompt, url)
     -- Your code
   end)
 
-  hook.Call("OpenAI.onImageDownloaded", "OpenAI.onImageDownloaded", function(ply, location, prompt)
+  hook.Add("OpenAI.onImageDownloaded", "OpenAI.onImageDownloaded", function(ply, location, prompt)
 
     print( ply:Nick() ) -- vicentefelipechile
     print( location )   -- openai/image/1681134554_a_cat_in_the_space    <-  Path to the image in "DATA"
