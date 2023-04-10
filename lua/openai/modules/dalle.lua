@@ -43,8 +43,10 @@ if CLIENT then
                 fCode()
 
                 if code == 200 then
-                    local name = OpenAI.imageSetFileName(prompt)
-                    file.Write("openai/image/" .. name, image)
+                    local name = "openai/image/" .. OpenAI.imageSetFileName(prompt)
+                    file.Write(name, image)
+
+                    hook.Call("OpenAI.onImageDownloaded", nil, ply, name, prompt)
                 end
             end
         })
