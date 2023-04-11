@@ -2,6 +2,7 @@
                                 Chat Module
 ----------------------------------------------------------------------------]]--
 
+local noshow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 if SERVER then
     util.AddNetworkString("openai.chatCLtoSV")
@@ -14,7 +15,7 @@ if CLIENT then
         local prompt = net.ReadString()
         local response = net.ReadString()
 
-        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, ply:Nick(), ": ", COLOR_CLIENT, prompt)
+        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, prompt)
         OpenAI.chatPrint("[Chat] ", COLOR_WHITE, "OpenAI: ", response)
 
         hook.Call("OpenAI.onChatReceive", nil, ply, prompt, response)
@@ -121,47 +122,40 @@ end)
       Commands Scripts
 ------------------------]]--
 
-local cases = {
-    [0] = function(ply, prompt)
-        if ulx then
-            return
+hook.Add("OpenAI.chatPlyCanUse", "OpenAI.chatPlyCanUse", function(ply)
+    
+    local admin = GetConVar("openai_admin"):GetInt()
+    local canUse = false
+
+    if admin == 0 then
+        if ULib then
+            canUse = ULib.ucl.query(ply, "OpenAI.chat")
         else
-            OpenAI.chatFetch(ply, prompt)
+            canUse = true
         end
-    end,
-
-    [1] = function(ply, prompt)
-        OpenAI.chatFetch(ply, prompt)
-    end,
-
-    [2] = function(ply, prompt)
-        if ply:IsAdmin() then
-            OpenAI.chatFetch(ply, prompt)
+    elseif admin == 1 then
+        canUse = true
+    elseif admin == 2 then
+        canUse = ply:IsAdmin()
+    elseif admin == 3 then
+        canUse = ply:IsSuperAdmin()
+    elseif admin == 4 then
+        if ULib then
+            canUse = ULib.ucl.query(ply, "OpenAI.chat")
         end
-    end,
-
-    [3] = function(ply, prompt)
-        if ply:IsSuperAdmin() then
-            OpenAI.chatFetch(ply, prompt)
-        end
-    end,
-
-    [4] = function(ply, prompt)
-        
     end
-}
 
-local noshow = CreateConVar("openai_chat_noshow", 1, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
+    return canUse
+end)
+
 hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
     local cmd, prompt = OpenAI.handleCommands(text)
 
     if cmd == nil or cmd ~= "chat" then return end
-    
-    local permissionType = GetConVar("openai_admin"):GetInt()
-    local fn = cases[permissionType] or function() end
+    if prompt == nil or #prompt < 1 then return end
 
-    fn(ply, prompt)
+    OpenAI.chatFetch(ply, prompt)
 
     return noshow:GetBool() and "" or text
 end)

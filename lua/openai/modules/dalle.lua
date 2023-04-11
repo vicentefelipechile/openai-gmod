@@ -2,6 +2,8 @@
                                 Dalle Module
 ----------------------------------------------------------------------------]]--
 
+local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
+
 if SERVER then
     util.AddNetworkString("openai.imageCLtoSV")
     util.AddNetworkString("openai.imageSVtoCL")
@@ -43,10 +45,10 @@ if CLIENT then
                 fCode()
 
                 if code == 200 then
-                    local name = "openai/image/" .. OpenAI.imageSetFileName(prompt)
-                    file.Write(name, image)
+                    local path = "openai/image/" .. OpenAI.imageSetFileName(prompt)
+                    file.Write(path, image)
 
-                    hook.Call("OpenAI.onImageDownloaded", nil, ply, name, prompt)
+                    hook.Call("OpenAI.onImageDownloaded", nil, ply, path, prompt)
                 end
             end
         })
@@ -147,47 +149,41 @@ end)
       Commands Scripts
 ------------------------]]--
 
-local cases = {
-    [0] = function(ply, prompt)
-        if ulx then
-            return
+hook.Add("OpenAI.imagePlyCanUse", "OpenAI.imagePlyCanUse", function(ply)
+    
+    local admin = GetConVar("openai_admin"):GetInt()
+    local canUse = false
+
+    if admin == 0 then
+        if ULib then
+            canUse = ULib.ucl.query(ply, "OpenAI.image")
         else
-            OpenAI.imageFetch(ply, prompt)
+            canUse = true
         end
-    end,
-
-    [1] = function(ply, prompt)
-        OpenAI.imageFetch(ply, prompt)
-    end,
-
-    [2] = function(ply, prompt)
-        if ply:IsAdmin() then
-            OpenAI.imageFetch(ply, prompt)
+    elseif admin == 1 then
+        canUse = true
+    elseif admin == 2 then
+        canUse = ply:IsAdmin()
+    elseif admin == 3 then
+        canUse = ply:IsSuperAdmin()
+    elseif admin == 4 then
+        if ULib then
+            canUse = ULib.ucl.query(ply, "OpenAI.image")
         end
-    end,
-
-    [3] = function(ply, prompt)
-        if ply:IsSuperAdmin() then
-            OpenAI.imageFetch(ply, prompt)
-        end
-    end,
-
-    [4] = function(ply, prompt)
-        
     end
-}
+
+    return canUse
+end)
 
 
-local image_show = CreateConVar("openai_image_noshow", 0, FCVAR_ARCHIVE, "Should show the command in the chat?", 0, 1)
 hook.Add("PlayerSay", "OpenAI.image", function(ply, text)
 
     local cmd, prompt = OpenAI.handleCommands(text)
-    if cmd == nil or cmd ~= "dalle" then return end
-    
-    local permissionType = GetConVar("openai_admin"):GetInt()
-    local fn = cases[permissionType] or function() end
 
-    fn(ply, prompt)
+    if cmd == nil or cmd ~= "dalle" then return end
+    if prompt == nil or #prompt < 1 then return end
+
+    OpenAI.imageFetch(ply, prompt)
 
     return image_show:GetBool() and "" or text
 end)
