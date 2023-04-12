@@ -10,10 +10,22 @@ include("openai/server/reqwest.lua")
 ------------------------]]--
 
 local REQUESTS = {
+    -- Main
     ["models"]      = {"GET", "https://api.openai.com/v1/models"},                  -- https://platform.openai.com/docs/api-reference/models
     ["completions"] = {"POST", "https://api.openai.com/v1/completions"},            -- https://platform.openai.com/docs/api-reference/completions
     ["chat"]        = {"POST", "https://api.openai.com/v1/chat/completions"},       -- https://platform.openai.com/docs/api-reference/chat
     ["images"]      = {"POST", "https://api.openai.com/v1/images/generations"},     -- https://platform.openai.com/docs/api-reference/images
+
+    -- Others
+    ["embeddings"]  = {"POST", "https://api.openai.com/v1/embeddings"},             -- https://platform.openai.com/docs/api-reference/embeddings
+    ["transcription"]= {"POST", "https://api.openai.com/v1/audio/transcriptions"},  -- https://platform.openai.com/docs/api-reference/audio/create
+    ["translation"] = {"POST",  "https://api.openai.com/v1/audio/translations"},    -- https://platform.openai.com/docs/api-reference/audio/create
+
+    -- Files
+    ["list"]        = {"GET", "https://api.openai.com/v1/files"},                   -- https://platform.openai.com/docs/api-reference/files/list
+    ["upload"]      = {"POST", "https://api.openai.com/v1/files"},                  -- https://platform.openai.com/docs/api-reference/files/upload
+    ["delete"]      = {"DELETE", "https://api.openai.com/v1/files/"},               -- https://platform.openai.com/docs/api-reference/files/delete
+    ["retrieve"]    = {"GET", "https://api.openai.com/v1/files/"},                  -- https://platform.openai.com/docs/api-reference/files/retrieve
 }
 
 OpenAI.REQUESTS = REQUESTS
@@ -31,10 +43,14 @@ local cfg = OpenAI.FileRead()
         Server Scripts
 ------------------------]]--
 
-function OpenAI.HTTP(request, body, headers, onsuccess, onfailure)
+function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
     if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
 
     local method, url = REQUESTS[request][1], REQUESTS[request][2]
+
+    if not context == nil then
+        url = url .. context
+    end
 
     reqwest({
         url = url,
