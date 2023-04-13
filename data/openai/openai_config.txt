@@ -1,3 +1,4 @@
+# API Token
 OpenAI: sk-XXXXXXXXXXXXXXXXXXXXX
 
 
@@ -6,20 +7,29 @@ Completion_model: text-davinci-003
 Completion_suffix: none
 Completion_max_tokens: 24
 Completion_temperature: 1
-Completion_user: STEAM_[steamid]
+Completion_user: [steamid]
 
 
 # Images configuracion
 Image_size: 256x256
-Image_user: STEAM_[steamid]
+Image_user: [steamid]
 
 
 # Chat configuracion
 Chat_model: gpt-3.5-turbo
-Chat_message: [{"role": "user", "content": "[first_message]" }]
 Chat_temperature: 1
 Chat_max_tokens: 24
-Chat_user: STEAM_[steamid]
+Chat_user: [steamid]
+
+
+# Discord Webhook
+Discord_webhook: https://discord.com/api/webhooks/
+Discord_avatar: https://i.imgur.com/wmTcTkk.png
+Discord_name: OpenAI
+
+# https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
+
+
 
 
 # Formatos permitidos
@@ -30,10 +40,3 @@ Chat_user: STEAM_[steamid]
 
 # Revisa mas aqui V
 # https://platform.openai.com/docs/models/model-endpoint-compatibility
-
-
-
-# Discord Webhook
-Discord_webhook: https://discord.com/api/webhooks/
-Discord_avatar: https://i.imgur.com/wmTcTkk.png
-Discord_name: OpenAI

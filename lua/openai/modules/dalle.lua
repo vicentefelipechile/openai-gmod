@@ -5,7 +5,6 @@
 local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 if SERVER then
-    util.AddNetworkString("openai.imageCLtoSV")
     util.AddNetworkString("openai.imageSVtoCL")
 end
 

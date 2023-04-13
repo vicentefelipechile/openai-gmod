@@ -73,6 +73,7 @@ function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
 end
 
 
+-- Generate by AI
 function OpenAI.IntToJson(field, json)
     local pattern = [["]] .. field .. [[":(%d+%.?%d*)]]
     local fieldValue = string.match(json, pattern)
@@ -86,6 +87,7 @@ function OpenAI.IntToJson(field, json)
         return json
     end
 end
+
 
 function OpenAI.replaceSteamID(text, ply)
     if string.find(text, "%[steamid%]") then

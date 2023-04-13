@@ -5,7 +5,6 @@
 local noshow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 if SERVER then
-    util.AddNetworkString("openai.chatCLtoSV")
     util.AddNetworkString("openai.chatSVtoCL")
 end
 

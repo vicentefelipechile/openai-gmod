@@ -2,8 +2,10 @@
                                 Discord Module
 ----------------------------------------------------------------------------]]--
 
-local defaultinfo = CreateConVar("openai_discord_usedefaultwebhookinfo", 0, FCVAR_ARCHIVE, "Use the default info from Discord instead of replace it", 0, 1)
-local usediscord = CreateConVar("openai_discord_enable", 0, FCVAR_ARCHIVE, "Enable the discord webhook", 0, 1)
+local defaultinfo = CreateConVar("openai_discord_usedefaultwebhookinfo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Use the default info from Discord instead of replace it", 0, 1)
+local usediscord = CreateConVar("openai_discord_enable", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE, FCVAR_PROTECTED}, "Enable the discord webhook", 0, 1)
+
+if CLIENT then return end
 
 --[[------------------------
       Local Definitions
@@ -23,6 +25,7 @@ local cfg = OpenAI.FileRead()
 function OpenAI.discordSendMessage(tbl)
     if not type(tbl) == "table" then MsgC(c_error, "ERROR", c_normal, ": The argument #1 isn't a table") return end
 
+    local useragent = "Garry's Mod OpenAI/1.0 (" .. (system.IsLinux() and "Linux" or system.IsWindows() and "Windows" or "OSX") .. ") User-Agent"
     reqwest({
         method = "POST",
         url = cfg["discord_webhook"],
@@ -32,7 +35,7 @@ function OpenAI.discordSendMessage(tbl)
         type = "application/json",
 
         headers = {
-            ["User-Agent"] = "OpenAI/1.0 (" .. (system.IsLinux() and "Linux" or system.IsWindows() and "Windows" or "OSX") .. ") User-Agent"
+            ["User-Agent"] = useragent
         },
 
         success = function(code, _, headers)

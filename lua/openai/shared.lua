@@ -18,6 +18,7 @@ if SERVER then
 
     AddCSLuaFile("openai/modules/chat.lua")
     AddCSLuaFile("openai/modules/dalle.lua")
+    AddCSLuaFile("openai/modules/discord.lua")
 end
 include("openai/modules/enum_color.lua")
 include("openai/modules/httpcode.lua")
@@ -69,15 +70,14 @@ function OpenAI.FileReset()
                             file.Write(cfg_file, body)
                         end,
         failed          = function(msg)
-                            MsgC("Error al descargar el archivo:")
-                            MsgC(msg)
+                            MsgC("Error al descargar el archivo:", msg, "\n")
         end
     })
 
 end
 
 if SERVER then
-    concommand.Add("openai_config_reset", OpenAI.FileReset, _, "Reinicia el archivo de configuracion")
+    concommand.Add("openai_config_resetall", OpenAI.FileReset, _, "Reset to default config")
 
     if not file.Exists(cfg_folder .. "/openai_config.txt", "DATA") then
         OpenAI.FileReset()
@@ -125,6 +125,4 @@ end
 ----------------------------]]--
 include("openai/modules/chat.lua")
 include("openai/modules/dalle.lua")
-if SERVER then
-    include("openai/server/discord.lua")
-end
+include("openai/modules/discord.lua")
