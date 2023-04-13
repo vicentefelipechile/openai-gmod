@@ -3,6 +3,7 @@
 ----------------------------------------------------------------------------]]--
 
 local noshow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
+local alwaysreset = CreateConVar("openai_chat_alwaysreset", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Always reset the chat?")
 
 if SERVER then
     util.AddNetworkString("openai.chatSVtoCL")
@@ -50,14 +51,6 @@ end
         Main Scripts
 ------------------------]]--
 
-function OpenAI.GetPlayerChat(ply)
-    local messages
-
-    if not file.Exists("openai/chat/log_" .. ply:SteamID64() .. ".json", "DATA") then
-        file.Write("openai/chat/log_" .. ply:SteamID64() .. ".json", "")
-    end
-end
-
 function OpenAI.chatFetch(ply, msg)
     if not API then return end
 
@@ -66,10 +59,9 @@ function OpenAI.chatFetch(ply, msg)
 
     local body = {
         model       = cfg["chat_model"],
-        messages    = {{
-            role = "user",
-            content = msg
-        }},
+        messages    = {
+            { role = "user", content = msg }
+        },
         temperature = tonumber(cfg["chat_temperature"]),
         max_tokens  = tonumber(cfg["chat_max_tokens"]),
         user        = OpenAI.replaceSteamID( cfg["chat_user"], ply ),
