@@ -39,7 +39,10 @@ OpenAI.HTTPcode = {
         Client Error 4XX
     --------------------]]--
     [400] = function() pError("400 - Bad Request") pMsg("The server was unable to interpret the request given invalid syntax") end,
-    [401] = function() pError("401 - Unauthorized") pMsg("Authentication is required to get the requested response") end,
+    [401] = function()
+        pError("401 - Unauthorized") pMsg("Authentication is required to get the requested response")
+        eMsg("Look at this page for more info: https://platform.openai.com/docs/guides/error-codes/error-codes")
+    end,
     [403] = function() pError("403 - Forbidden") pMsg("You don't have the necessary permissions for certain content, so the server is refusing to grant an appropriate response") end,
     [404] = function() pError("404 - Not Found") pMsg("The server was unable to find the requested content") end,
     [405] = function() pError("405 - Method Not Allowed") pMsg("The requested method is known to the server but it has been disabled and cannot be used") end,
@@ -56,7 +59,10 @@ OpenAI.HTTPcode = {
     --[[--------------------
         Server Error 5XX
     --------------------]]--
-    [500] = function() pError("500 - Internal Server Error") pMsg("This server error response code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request") eMsg("Generally you can assume it wasn't your fault") end,
+    [500] = function() pError("500 - Internal Server Error") pMsg("This server error response code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request")
+        eMsg("Look at this page for more info: https://platform.openai.com/docs/guides/error-codes/error-codes")
+        eMsg("Generally you can assume it wasn't your fault")
+    end,
     [501] = function() pError("501 - Not Implemented") pMsg("This server error response code means that the server does not support the functionality required to fulfill the request") end,
     [502] = function() pError("502 - Bad Gateway") pMsg("This server error response code indicates that the server, while acting as a gateway or proxy, received an invalid response from the upstream server") end,
     [503] = function() pError("503 - Service Unavailable") pMsg("This server error response code indicates that the server is not ready to handle the request") end,
