@@ -1,13 +1,5 @@
 # API Token
-OpenAI: sk-XXXXXXXXXXXXXXXXXXXXX
-
-
-# Completions configuracion
-Completion_model: text-davinci-003
-Completion_suffix: none
-Completion_max_tokens: 24
-Completion_temperature: 1
-Completion_user: [steamid]
+OpenAI: sk-XXXXXXXXXXXXXXXXXXXXX¿
 
 
 # Images configuracion
