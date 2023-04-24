@@ -97,15 +97,13 @@ function OpenAI.imageFetch(ply, msg)
     local canUse = hook.Run("OpenAI.imagePlyCanUse", ply)
     if canUse == false then return end
 
-    local body = {
+    local body = util.TableToJSON({
         prompt  = msg,
         size    = cfg["image_size"],
         user    = OpenAI.replaceSteamID( cfg["image_user"], ply ),
-    }
+    })
 
-    local jsonBody = util.TableToJSON(body)
-
-    OpenAI.HTTP("images", jsonBody, header, function(code, body)
+    OpenAI.HTTP("images", body, header, function(code, body)
         local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
         fCode()
 
@@ -153,13 +151,7 @@ hook.Add("OpenAI.imagePlyCanUse", "OpenAI.imagePlyCanUse", function(ply)
     local admin = GetConVar("openai_admin"):GetInt()
     local canUse = false
 
-    if admin == 0 then
-        if ULib then
-            canUse = ULib.ucl.query(ply, "OpenAI.image")
-        else
-            canUse = true
-        end
-    elseif admin == 1 then
+    if admin == 1 then
         canUse = true
     elseif admin == 2 then
         canUse = ply:IsAdmin()

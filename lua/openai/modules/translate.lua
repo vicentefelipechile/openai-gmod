@@ -1,24 +1,23 @@
 --[[----------------------------------------------------------------------------
-                                Chat Module
+                                translate Module
 ----------------------------------------------------------------------------]]--
 
-local noshow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
-local alwaysreset = CreateConVar("openai_chat_alwaysreset", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Always reset the chat?")
-
 if SERVER then
-    util.AddNetworkString("openai.chatSVtoCL")
+    util.AddNetworkString("openai.translateSVtoCL")
 end
 
 if CLIENT then
-    net.Receive("openai.chatSVtoCL", function()
+    CreateConVar("openai_translate_from", "spanish", {FCVAR_ARCHIVE, FCVAR_USERINFO}, "Request a translate from a language")
+    CreateConVar("openai_translate_to", "english", {FCVAR_ARCHIVE, FCVAR_USERINFO}, "Request a translate to a language")
+
+    net.Receive("openai.translateSVtoCL", function()
         local ply = net.ReadEntity()
         local prompt = net.ReadString()
         local response = net.ReadString()
 
-        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, prompt)
-        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, "OpenAI: ", response)
+        OpenAI.chatPrint("[Translate] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, response)
 
-        hook.Call("OpenAI.onChatReceive", nil, ply, prompt, response)
+        hook.Call("OpenAI.onTranslateReceive", nil, ply, prompt, response)
     end)
 
     return
@@ -36,37 +35,31 @@ local header = API and {
     ["Authorization"] = "Bearer " .. API,
 }
 
-local c_error = COLOR_RED
-local c_normal = COLOR_SERVER
-
-
-do
-    if not file.Exists("openai/chat", "DATA") then
-        file.CreateDir("openai/chat")
-    end
-end
-
 
 --[[------------------------
         Main Scripts
 ------------------------]]--
 
-function OpenAI.chatFetch(ply, msg)
+function OpenAI.translateFetch(ply, msg)
     if not API then return end
 
-    local canUse = hook.Run("OpenAI.chatPlyCanUse", ply)
+    local canUse = hook.Run("OpenAI.translatePlyCanUse", ply)
     if canUse == false then return end
 
-    local body = util.TableToJSON({
-        model       = cfg["chat_model"],
-        messages    = {
-            { role = "user", content = msg }
-        },
-        temperature = tonumber(cfg["chat_temperature"]),
-        max_tokens  = tonumber(cfg["chat_max_tokens"]),
-        user        = OpenAI.replaceSteamID( cfg["chat_user"], ply ),
-    })
+    local lang_from = ply:GetInfo("openai_translate_from")
+    local lang_to = ply:GetInfo("openai_translate_to")
 
+    local content = string.format("Generate a translation from %s to %s\n%s: %s\n%s:", lang_from, lang_to, lang_from, msg, lang_to)
+
+    local body = util.TableToJSON({
+        model       = cfg["translator_model"],
+        messages    = {
+            { role = "user", content = content }
+        },
+        temperature = tonumber(cfg["translator_temperature"]),
+        max_tokens  = tonumber(cfg["translator_max_tokens"]),
+        user        = OpenAI.replaceSteamID( cfg["translator_user"], ply ),
+    })
 
     local jsonBody = OpenAI.IntToJson("max_tokens", body )
 
@@ -79,13 +72,13 @@ function OpenAI.chatFetch(ply, msg)
         if code == 200 then
             local response = json["choices"][1]["message"]["content"]
 
-            net.Start("openai.chatSVtoCL")
+            net.Start("openai.translateSVtoCL")
                 net.WriteEntity(ply)
                 net.WriteString(msg)
                 net.WriteString(response)
             net.Broadcast()
 
-            hook.Call("OpenAI.chatFetch", nil, ply, msg, response)
+            hook.Call("OpenAI.translateFetch", nil, ply, msg, response)
         elseif code == 400 then
             mError = json["error"]["message"]
             MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
@@ -105,7 +98,7 @@ function OpenAI.chatFetch(ply, msg)
 end
 
 
-concommand.Add("openai_chat_reloadconfig", function()
+concommand.Add("openai_translate_reloadconfig", function()
     cfg = OpenAI.FileRead()
 end)
 
@@ -114,7 +107,7 @@ end)
       Commands Scripts
 ------------------------]]--
 
-hook.Add("OpenAI.chatPlyCanUse", "OpenAI.chatPlyCanUse", function(ply)
+hook.Add("OpenAI.translatePlyCanUse", "OpenAI.translatePlyCanUse", function(ply)
     
     local admin = GetConVar("openai_admin"):GetInt()
     local canUse = false
@@ -134,14 +127,14 @@ hook.Add("OpenAI.chatPlyCanUse", "OpenAI.chatPlyCanUse", function(ply)
     return canUse
 end)
 
-hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
+hook.Add("PlayerSay", "OpenAI.translate", function(ply, text)
 
-    local cmd, prompt = OpenAI.handleCommands(text)
+    local prefix, prompt = text:sub(1,1)
 
-    if cmd == nil or cmd ~= "chat" then return end
+    if prefix == nil or cmd ~= cfg["translator_cmd"] then return end
     if prompt == nil or #prompt < 1 then return end
 
-    OpenAI.chatFetch(ply, prompt)
+    OpenAI.translateFetch(ply, prompt)
 
-    return noshow:GetBool() and "" or text
+    return ""
 end)

@@ -13,6 +13,13 @@ Chat_temperature: 1
 Chat_max_tokens: 24
 Chat_user: [steamid]
 
+# Translator configuracion
+Translator_model: gpt-3.5-turbo
+Translator_temperature: 1
+Translator_max_tokens: 24
+Translator_user: [steamid]
+Translator_cmd: ,
+
 
 # Discord Webhook
 Discord_webhook: https://discord.com/api/webhooks/
