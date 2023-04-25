@@ -4,6 +4,10 @@
 
 local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
+
 if SERVER then
     util.AddNetworkString("openai.imageSVtoCL")
 end
@@ -41,7 +45,7 @@ if CLIENT then
             
             success = function(code, image)
                 local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-                fCode()
+                fCode(GetPath())
 
                 if code == 200 then
                     local path = "openai/image/" .. OpenAI.imageSetFileName(prompt)
@@ -63,8 +67,7 @@ end
 ------------------------]]--
 
 
-local cfg = OpenAI.FileRead()
-local API = cfg["openai"] or false
+local API = OpenAI.FileRead()["openai"] or false
 
 local header = API and {
     ["Authorization"] = "Bearer " .. API,
@@ -97,6 +100,8 @@ function OpenAI.imageFetch(ply, msg)
     local canUse = hook.Run("OpenAI.imagePlyCanUse", ply)
     if canUse == false then return end
 
+    local cfg = OpenAI.FileRead()
+
     local body = util.TableToJSON({
         prompt  = msg,
         size    = cfg["image_size"],
@@ -105,7 +110,7 @@ function OpenAI.imageFetch(ply, msg)
 
     OpenAI.HTTP("images", body, header, function(code, body)
         local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode()
+        fCode(GetPath())
 
         local json = util.JSONToTable( string.Trim( body ) )
 
@@ -135,11 +140,6 @@ function OpenAI.imageFetch(ply, msg)
         MsgC(COLOR_RED, err)
     end)
 end
-
-
-concommand.Add("openai_image_reloadconfig", function()
-    cfg = OpenAI.FileRead()
-end)
 
 
 --[[------------------------

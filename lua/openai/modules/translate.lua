@@ -2,6 +2,10 @@
                                 translate Module
 ----------------------------------------------------------------------------]]--
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
+
 if SERVER then
     util.AddNetworkString("openai.translateSVtoCL")
 end
@@ -65,7 +69,7 @@ function OpenAI.translateFetch(ply, msg)
 
     OpenAI.HTTP("chat", jsonBody, header, function(code, body)
         local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode()
+        fCode(GetPath())
 
         local json = util.JSONToTable( string.Trim( body ) )
 

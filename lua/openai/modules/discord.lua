@@ -5,6 +5,10 @@
 local defaultinfo = CreateConVar("openai_discord_usedefaultwebhookinfo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Use the default info from Discord instead of replace it", 0, 1)
 local usediscord = CreateConVar("openai_discord_enable", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE, FCVAR_PROTECTED}, "Enable the discord webhook", 0, 1)
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
+
 if CLIENT then return end
 
 --[[------------------------
@@ -40,7 +44,7 @@ function OpenAI.discordSendMessage(tbl)
 
         success = function(code, _, headers)
             local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-            fCode()
+            fCode(GetPath())
         end,
         failed = function(err)
             MsgC(err, "\n")
@@ -73,7 +77,9 @@ hook.Add("OpenAI.chatFetch", "OpenAI.discord_chat", function(ply, prompt, respon
         body["avatar_url"] = cfg["discord_avatar"]
     end
 
-    OpenAI.discordSendMessage(body)
+    if usediscord:GetBool() then
+        OpenAI.discordSendMessage(body)
+    end
 end)
 
 
@@ -102,5 +108,7 @@ hook.Add("OpenAI.imageFetch", "OpenAI.discord_image", function(ply, prompt, resp
         body["avatar_url"] = cfg["discord_avatar"]
     end
 
-    OpenAI.discordSendMessage(body)
+    if usediscord:GetBool() then
+        OpenAI.discordSendMessage(body)
+    end
 end)

@@ -5,6 +5,10 @@
 local noshow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 local alwaysreset = CreateConVar("openai_chat_alwaysreset", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Always reset the chat?")
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
+
 if SERVER then
     util.AddNetworkString("openai.chatSVtoCL")
 end
@@ -72,7 +76,7 @@ function OpenAI.chatFetch(ply, msg)
 
     OpenAI.HTTP("chat", jsonBody, header, function(code, body)
         local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode()
+        fCode(GetPath())
 
         local json = util.JSONToTable( string.Trim( body ) )
 
@@ -86,7 +90,7 @@ function OpenAI.chatFetch(ply, msg)
             net.Broadcast()
 
             hook.Call("OpenAI.chatFetch", nil, ply, msg, response)
-        elseif code == 400 then
+        elseif code >= 400 then
             mError = json["error"]["message"]
             MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
 
