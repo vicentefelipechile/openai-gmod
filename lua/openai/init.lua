@@ -3,7 +3,7 @@
 ----------------------------------------------------------------------------]]--
 
 util.AddNetworkString("OpenAI.errorToCL")
-include("openai/server/reqwest.lua")
+--include("openai/server/reqwest.lua")
 
 --[[------------------------
       Local Definitions
@@ -52,7 +52,7 @@ function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
         url = url .. context
     end
 
-    reqwest({
+    HTTP({
         url = url,
         body = body or util.TableToJSON({}),
         method = method,

@@ -26,7 +26,7 @@ function OpenAI.discordSendMessage(tbl)
     if not type(tbl) == "table" then MsgC(c_error, "ERROR", c_normal, ": The argument #1 isn't a table") return end
 
     local useragent = "Garry's Mod OpenAI/1.0 (" .. (system.IsLinux() and "Linux" or system.IsWindows() and "Windows" or "OSX") .. ") User-Agent"
-    reqwest({
+    HTTP({
         method = "POST",
         url = cfg["discord_webhook"],
         timeout = 20,
