@@ -122,7 +122,7 @@ if SERVER then
 end
 
 do
-    if not file.Exists("openai/openai_config.txt") then
+    if not file.Exists("openai/openai_config.txt", "DATA") then
         HTTP({
             method          = "GET",
             url             = "https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
