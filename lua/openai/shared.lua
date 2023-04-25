@@ -60,19 +60,51 @@ function OpenAI.FileReset()
         file.Delete(cfg_file)
     end
 
-    HTTP({
-        method          = "GET",
-        url             = "https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
-        success         = function(code, body)
-                            local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-                            fCode()
+    local default = [[
+# API Token
+OpenAI: sk-XXXXXXXXXXXXXXXXXXXXX¿
 
-                            file.Write(cfg_file, body)
-                        end,
-        failed          = function(msg)
-                            MsgC("Error al descargar el archivo:", msg, "\n")
-        end
-    })
+
+# Images configuracion
+Image_size: 256x256
+Image_user: [steamid]
+
+
+# Chat configuracion
+Chat_model: gpt-3.5-turbo
+Chat_temperature: 1
+Chat_max_tokens: 24
+Chat_user: [steamid]
+
+# Translator configuracion
+Translator_model: gpt-3.5-turbo
+Translator_temperature: 1
+Translator_max_tokens: 24
+Translator_user: [steamid]
+Translator_cmd: ,
+
+
+# Discord Webhook
+Discord_webhook: https://discord.com/api/webhooks/
+Discord_avatar: https://i.imgur.com/wmTcTkk.png
+Discord_name: OpenAI
+
+# https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks
+
+
+
+
+# Formatos permitidos
+#
+# [steamid] = STEAM_X_XXXXXXXXXX
+# [steamid64] = 765XXXXXXXXXXXXX
+# [first_message] = El mensaje colocado en el chat
+
+# Revisa mas aqui V
+# https://platform.openai.com/docs/models/model-endpoint-compatibility
+]]
+
+    file.Write(cfg_file, default)
 
 end
 
