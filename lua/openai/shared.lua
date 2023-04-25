@@ -155,19 +155,7 @@ end
 
 do
     if not file.Exists("openai/openai_config.txt", "DATA") then
-        HTTP({
-            method          = "GET",
-            url             = "https://raw.githubusercontent.com/vicentefelipechile/openai-gmod/main/data/openai/openai_config.txt",
-            success         = function(code, body)
-                                local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-                                fCode()
-
-                                file.Write(cfg_file, body)
-                            end,
-            failed          = function(msg)
-                                MsgC("Error al descargar el archivo:", msg, "\n")
-            end
-        })
+        OpenAI.FileReset()
     end
 end
 
