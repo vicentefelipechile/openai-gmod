@@ -14,7 +14,6 @@ if SERVER then
     AddCSLuaFile("openai/modules/enum_color.lua")
     AddCSLuaFile("openai/modules/httpcode.lua")
     include("openai/server/default.lua")
-    include("openai/server/binarymodule.lua")
 
     AddCSLuaFile("openai/modules/chat.lua")
     AddCSLuaFile("openai/modules/dalle.lua")
