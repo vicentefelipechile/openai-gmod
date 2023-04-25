@@ -20,6 +20,7 @@ local REQUESTS = {
     ["embeddings"]  = {"POST", "https://api.openai.com/v1/embeddings"},             -- https://platform.openai.com/docs/api-reference/embeddings
     ["transcription"]= {"POST", "https://api.openai.com/v1/audio/transcriptions"},  -- https://platform.openai.com/docs/api-reference/audio/create
     ["translation"] = {"POST",  "https://api.openai.com/v1/audio/translations"},    -- https://platform.openai.com/docs/api-reference/audio/create
+    ["moderation"]  = {"POST",  "https://api.openai.com/v1/moderations"},           -- https://platform.openai.com/docs/api-reference/moderations/create
 
     -- Files
     ["list"]        = {"GET", "https://api.openai.com/v1/files"},                   -- https://platform.openai.com/docs/api-reference/files/list
