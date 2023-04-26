@@ -5,6 +5,10 @@
 local noshow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 local alwaysreset = CreateConVar("openai_chat_alwaysreset", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Always reset the chat?")
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
+
 if SERVER then
     util.AddNetworkString("openai.chatSVtoCL")
 end
@@ -28,17 +32,8 @@ end
       Local Definitions
 ------------------------]]--
 
-
-local cfg = OpenAI.FileRead()
-local API = cfg["openai"] or false
-
-local header = API and {
-    ["Authorization"] = "Bearer " .. API,
-}
-
 local c_error = COLOR_RED
 local c_normal = COLOR_SERVER
-
 
 do
     if not file.Exists("openai/chat", "DATA") then
@@ -52,27 +47,27 @@ end
 ------------------------]]--
 
 function OpenAI.chatFetch(ply, msg)
-    if not API then return end
 
     local canUse = hook.Run("OpenAI.chatPlyCanUse", ply)
     if canUse == false then return end
 
-    local body = util.TableToJSON({
+    local cfg = OpenAI.FileRead()
+
+    local body = {
         model       = cfg["chat_model"],
         messages    = {
             { role = "user", content = msg }
         },
-        temperature = tonumber(cfg["chat_temperature"]),
-        max_tokens  = tonumber(cfg["chat_max_tokens"]),
+        temperature = cfg["chat_temperature"],
+        max_tokens  = cfg["chat_max_tokens"],
         user        = OpenAI.replaceSteamID( cfg["chat_user"], ply ),
-    })
+    }
 
-
-    local jsonBody = OpenAI.IntToJson("max_tokens", body )
-
-    OpenAI.HTTP("chat", jsonBody, header, function(code, body)
-        local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode()
+    local openai = OpenAI.Request()
+    openai:SetType("chat")
+    openai:SetBody(body)
+    openai:SetSuccess(function(code, body)
+        OpenAI.HandleCode(code, GetPath())
 
         local json = util.JSONToTable( string.Trim( body ) )
 
@@ -86,7 +81,7 @@ function OpenAI.chatFetch(ply, msg)
             net.Broadcast()
 
             hook.Call("OpenAI.chatFetch", nil, ply, msg, response)
-        elseif code == 400 then
+        elseif code >= 400 then
             mError = json["error"]["message"]
             MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
 
@@ -95,19 +90,12 @@ function OpenAI.chatFetch(ply, msg)
                     net.WriteString(json["error"]["message"])
                 net.Send(ply)
             end
-
         end
-
-    end,
-    function(err)
-        MsgC(COLOR_RED, err)
     end)
+
+    openai:SendRequest()
 end
 
-
-concommand.Add("openai_chat_reloadconfig", function()
-    cfg = OpenAI.FileRead()
-end)
 
 
 --[[------------------------

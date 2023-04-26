@@ -7,6 +7,10 @@ local usediscord = CreateConVar("openai_discord_enable", 0, {FCVAR_NOTIFY, FCVAR
 
 if CLIENT then return end
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
+
 --[[------------------------
       Local Definitions
 ------------------------]]--
@@ -26,7 +30,7 @@ function OpenAI.discordSendMessage(tbl)
     if not type(tbl) == "table" then MsgC(c_error, "ERROR", c_normal, ": The argument #1 isn't a table") return end
 
     local useragent = "Garry's Mod OpenAI/1.0 (" .. (system.IsLinux() and "Linux" or system.IsWindows() and "Windows" or "OSX") .. ") User-Agent"
-    reqwest({
+    HTTP({
         method = "POST",
         url = cfg["discord_webhook"],
         timeout = 20,
@@ -40,7 +44,7 @@ function OpenAI.discordSendMessage(tbl)
 
         success = function(code, _, headers)
             local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-            fCode()
+            fCode(GetPath())
         end,
         failed = function(err)
             MsgC(err, "\n")
@@ -73,7 +77,9 @@ hook.Add("OpenAI.chatFetch", "OpenAI.discord_chat", function(ply, prompt, respon
         body["avatar_url"] = cfg["discord_avatar"]
     end
 
-    OpenAI.discordSendMessage(body)
+    if usediscord:GetBool() then
+        OpenAI.discordSendMessage(body)
+    end
 end)
 
 
@@ -102,5 +108,7 @@ hook.Add("OpenAI.imageFetch", "OpenAI.discord_image", function(ply, prompt, resp
         body["avatar_url"] = cfg["discord_avatar"]
     end
 
-    OpenAI.discordSendMessage(body)
+    if usediscord:GetBool() then
+        OpenAI.discordSendMessage(body)
+    end
 end)

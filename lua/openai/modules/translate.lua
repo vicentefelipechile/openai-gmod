@@ -2,6 +2,8 @@
                                 translate Module
 ----------------------------------------------------------------------------]]--
 
+CreateConVar("openai_translate_enabled", 0, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Enable the translation module", 0, 1)
+
 if SERVER then
     util.AddNetworkString("openai.translateSVtoCL")
 end
@@ -27,13 +29,9 @@ end
       Local Definitions
 ------------------------]]--
 
-
-local cfg = OpenAI.FileRead()
-local API = cfg["openai"] or false
-
-local header = API and {
-    ["Authorization"] = "Bearer " .. API,
-}
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
 
 
 --[[------------------------
@@ -41,7 +39,7 @@ local header = API and {
 ------------------------]]--
 
 function OpenAI.translateFetch(ply, msg)
-    if not API then return end
+    local cfg = OpenAI.FileRead()
 
     local canUse = hook.Run("OpenAI.translatePlyCanUse", ply)
     if canUse == false then return end
@@ -49,28 +47,30 @@ function OpenAI.translateFetch(ply, msg)
     local lang_from = ply:GetInfo("openai_translate_from")
     local lang_to = ply:GetInfo("openai_translate_to")
 
-    local content = string.format("Generate a translation from %s to %s\n%s: %s\n%s:", lang_from, lang_to, lang_from, msg, lang_to)
+    local content = string.format("Translate this %s text into %s text\n\n%s", lang_from, lang_to, msg)
 
-    local body = util.TableToJSON({
+    local body = {
         model       = cfg["translator_model"],
         messages    = {
             { role = "user", content = content }
         },
-        temperature = tonumber(cfg["translator_temperature"]),
-        max_tokens  = tonumber(cfg["translator_max_tokens"]),
+        temperature = cfg["translator_temperature"],
+        max_tokens  = cfg["translator_max_tokens"],
         user        = OpenAI.replaceSteamID( cfg["translator_user"], ply ),
-    })
+    }
 
-    local jsonBody = OpenAI.IntToJson("max_tokens", body )
-
-    OpenAI.HTTP("chat", jsonBody, header, function(code, body)
-        local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode()
+    local openai = OpenAI.Request()
+    openai:SetType("chat")
+    openai:SetBody(body)
+    openai:SetSuccess(function(code, body)
+        OpenAI.HandleCode(code, GetPath())
 
         local json = util.JSONToTable( string.Trim( body ) )
 
         if code == 200 then
-            local response = json["choices"][1]["message"]["content"]
+            local response = string.Trim(json["choices"][1]["message"]["content"])
+
+            response = string.gsub(response, [[^%"(.-)%"$]], "%1")
 
             net.Start("openai.translateSVtoCL")
                 net.WriteEntity(ply)
@@ -79,28 +79,11 @@ function OpenAI.translateFetch(ply, msg)
             net.Broadcast()
 
             hook.Call("OpenAI.translateFetch", nil, ply, msg, response)
-        elseif code == 400 then
-            mError = json["error"]["message"]
-            MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
-
-            if GetConVar("openai_displayerrorcl"):GetBool() then
-                net.Start("OpenAI.errorToCL")
-                    net.WriteString(json["error"]["message"])
-                net.Send(ply)
-            end
-
         end
-
-    end,
-    function(err)
-        MsgC(COLOR_RED, err)
     end)
+
+    openai:SendRequest()
 end
-
-
-concommand.Add("openai_translate_reloadconfig", function()
-    cfg = OpenAI.FileRead()
-end)
 
 
 --[[------------------------
@@ -129,12 +112,14 @@ end)
 
 hook.Add("PlayerSay", "OpenAI.translate", function(ply, text)
 
-    local prefix, prompt = text:sub(1,1)
+    local prefix, prompt = text:sub(1,1), text:sub(1)
 
-    if prefix == nil or cmd ~= cfg["translator_cmd"] then return end
-    if prompt == nil or #prompt < 1 then return end
+    if prefix == OpenAI.FileRead()["translator_cmd"] then
+        if prompt == nil or #prompt < 1 then return end
+        print(1)
+        OpenAI.translateFetch(ply, prompt)
 
-    OpenAI.translateFetch(ply, prompt)
+        return ""
+    end
 
-    return ""
 end)

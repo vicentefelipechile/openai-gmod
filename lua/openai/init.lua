@@ -3,11 +3,14 @@
 ----------------------------------------------------------------------------]]--
 
 util.AddNetworkString("OpenAI.errorToCL")
-include("openai/server/reqwest.lua")
+include("openai/server/default.lua")
 
 --[[------------------------
       Local Definitions
 ------------------------]]--
+
+local trim = string.Trim
+local start = string.StartsWith
 
 local REQUESTS = {
     -- Main
@@ -38,41 +41,54 @@ local c_important = COLOR_MENU
 
 local folder = "openai"
 
-local cfg = OpenAI.FileRead()
 
 --[[------------------------
-        Server Scripts
+        Util Scripts
 ------------------------]]--
 
-function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
-    if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
 
-    local method, url = REQUESTS[request][1], REQUESTS[request][2]
+function OpenAI.FileRead()
+    local cfg = {}
+    local cfg_file = file.Open(folder .. "/openai_config.txt", "r", "DATA")
 
-    if not context == nil then
-        url = url .. context
+    if cfg_file == nil then return OpenAI.default end
+
+    while not cfg_file:EndOfFile() do
+        local line = trim( cfg_file:ReadLine() )
+
+        if line == "" or string.sub(line, 1, 1) == "#" then continue end
+
+        local key, value = string.match(line, "(%S+):%s*(.*)")
+        if key == nil or value == nil then continue end
+
+        key, value = string.lower( trim(key) ), trim(value)
+        if tonumber(value) then
+            value = tonumber(value)
+        end
+
+        cfg[key] = cfg[key] or value
     end
 
-    reqwest({
-        url = url,
-        body = body or util.TableToJSON({}),
-        method = method,
-        headers = headers or {},
-        type = "application/json",
-        timeout = 25,
+    cfg_file:Close()
 
-        success = function(code, body, headers)
-            if ( !onsuccess ) then return end
-            onsuccess( code, body, headers )
-        end,
-      
-        failed = function( err )
-            if ( !onfailure ) then return end
-            onfailure( err )
+    for k, v in pairs( OpenAI.default ) do
+        if cfg[k] == nil then
+            cfg[k] = v
         end
-    })
+    end
+
+    return cfg
 end
 
+
+function OpenAI.GetAPI()
+    local API = OpenAI.FileRead()["openai"] or false
+
+    local header = API == false and {} or { 
+        ["Authorization"] = "Bearer " .. API,
+    }
+    return header
+end
 
 -- Generate by AI
 function OpenAI.IntToJson(field, json)
@@ -100,4 +116,83 @@ function OpenAI.replaceSteamID(text, ply)
     end
 
     return text
+end
+
+
+--[[------------------------
+        Server Scripts
+------------------------]]--
+
+local openai = {
+
+    request = {
+        url = "https://api.openai.com",
+        body = {},
+        method = "GET",
+        headers = OpenAI.GetAPI(),
+        type = "application/json",
+        timeout = 25,
+        success = function() end,
+        failed = function() MsgC(COLOR_RED, err, "\n") end,
+    },
+
+    SetType = function(self, type)
+        if not REQUESTS[type] then return end
+
+        local method, url = REQUESTS[type][1], REQUESTS[type][2]
+        self.request["method"] = method
+        self.request["url"] = url
+    end,
+
+    GetType = function(self)
+        return self.request["method"], self.request["url"]
+    end,
+
+    SetBody = function(self, body)
+        self.request["body"] = body
+    end,
+
+    GetBody = function(self)
+        return self.request["body"]
+    end,
+
+    SetSuccess = function(self, func)
+        if not isfunction(func) then return end
+
+        self.request["success"] = func
+    end,
+
+    SetFailed = function(self, func)
+        if not isfunction(func) then return end
+
+        self.request["failed"] = func
+    end,
+
+    GetAll = function(self)
+        local all = table.Copy(self.request)
+        if all["headers"] and all["headers"]["Authorization"] then
+            all["headers"]["Authorization"] = "***PROTECTED***"
+        end
+
+        return all
+    end,
+
+    SendRequest = function(self)
+        local req = table.Copy( self.request )
+        local body = util.TableToJSON(req["body"])
+        
+        if req["body"]["max_tokens"] then
+            body = OpenAI.IntToJson( "max_tokens", body )
+        end
+
+        req["body"] = body
+
+        HTTP(req)
+    end
+}
+openai.__index = openai
+
+
+function OpenAI.Request()
+    return setmetatable( { [ 0 ] = 0 }, openai)
 end
