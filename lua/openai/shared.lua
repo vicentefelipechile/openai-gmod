@@ -9,14 +9,14 @@ CreateConVar("openai_displayerrorcl", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_
 --[[----------------------------
         Shared Functions
 ----------------------------]]--
-function OpenAI.print(...)
+function OpenAI.Print(...)
     local color = SERVER and COLOR_SERVER or COLOR_CLIENT
 
     MsgC(color, unpack({...}), "\n")
 end
 
 
-function OpenAI.handleCommands(str)
+function OpenAI.HandleCommands(str)
     local command, value = str:match("^(%S+)%s+(.*)$")
 
     if command and command:sub(1,1) == "!" then
@@ -27,3 +27,4 @@ function OpenAI.handleCommands(str)
 
     return command, value
 end
+OpenAI.handleCommands = OpenAI.HandleCommands

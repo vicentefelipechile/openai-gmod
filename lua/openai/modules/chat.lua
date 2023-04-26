@@ -19,8 +19,8 @@ if CLIENT then
         local prompt = net.ReadString()
         local response = net.ReadString()
 
-        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, prompt)
-        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, "OpenAI: ", response)
+        OpenAI.ChatPrint("[Chat] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, prompt)
+        OpenAI.ChatPrint("[Chat] ", COLOR_WHITE, "OpenAI: ", response)
 
         hook.Call("OpenAI.onChatReceive", nil, ply, prompt, response)
     end)
@@ -41,31 +41,34 @@ do
     end
 end
 
+local function SendChat(ply, msg, response)
+    net.Start("openai.chatSVtoCL")
+        net.WriteEntity(ply)
+        net.WriteString(msg)
+        net.WriteString(response)
+    net.Broadcast()
+end
+
 
 --[[------------------------
         Main Scripts
 ------------------------]]--
 
-function OpenAI.chatFetch(ply, msg)
+function OpenAI.ChatFetch(ply, msg)
 
     local canUse = hook.Run("OpenAI.chatPlyCanUse", ply)
     if canUse == false then return end
 
-    local cfg = OpenAI.FileRead()
-
-    local body = {
-        model       = cfg["chat_model"],
-        messages    = {
-            { role = "user", content = msg }
-        },
-        temperature = cfg["chat_temperature"],
-        max_tokens  = cfg["chat_max_tokens"],
-        user        = OpenAI.replaceSteamID( cfg["chat_user"], ply ),
-    }
-
     local openai = OpenAI.Request()
     openai:SetType("chat")
-    openai:SetBody(body)
+    openai:AddBody("model", OpenAI.GetConfig("chat_model"))
+    openai:AddBody("messages", {
+      { role = "user", content = msg}  
+    })
+    openai:AddBody("temperature", OpenAI.GetConfig("chat_temperature"))
+    openai:AddBody("max_tokens", OpenAI.GetConfig("chat_max_temperature"))
+    openai:AddBody("user", ply)
+
     openai:SetSuccess(function(code, body)
         OpenAI.HandleCode(code, GetPath())
 
@@ -74,11 +77,7 @@ function OpenAI.chatFetch(ply, msg)
         if code == 200 then
             local response = json["choices"][1]["message"]["content"]
 
-            net.Start("openai.chatSVtoCL")
-                net.WriteEntity(ply)
-                net.WriteString(msg)
-                net.WriteString(response)
-            net.Broadcast()
+            SendChat(ply, msg, response)
 
             hook.Call("OpenAI.chatFetch", nil, ply, msg, response)
         elseif code >= 400 then
@@ -95,7 +94,7 @@ function OpenAI.chatFetch(ply, msg)
 
     openai:SendRequest()
 end
-
+OpenAI.chatfetch = OpenAI.ChatFetch
 
 
 --[[------------------------
@@ -124,12 +123,12 @@ end)
 
 hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
-    local cmd, prompt = OpenAI.handleCommands(text)
+    local cmd, prompt = OpenAI.HandleCommands(text)
 
     if cmd == nil or cmd ~= "chat" then return end
     if prompt == nil or #prompt < 1 then return end
 
-    OpenAI.chatFetch(ply, prompt)
+    OpenAI.ChatFetch(ply, prompt)
 
     return noshow:GetBool() and "" or text
 end)

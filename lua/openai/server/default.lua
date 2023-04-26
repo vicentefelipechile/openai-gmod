@@ -7,19 +7,17 @@
 ------------------------]]--
 
 OpenAI.default = OpenAI.default or {
+    user = "[steamid]",
 
     image_size = "256x256",
-    image_user = "[steamid]",
 
     chat_model = "gpt-3.5-turbo",
     chat_temperature = 1,
     chat_max_tokens = 24,
-    chat_user = "[steamid]",
 
     translator_model = "gpt-3.5-turbo",
     translator_temperature = 1,
     translator_max_tokens = 24,
-    translator_user = "[steamid]",
     translator_cmd = ",",
 
     discord_avatar = "https://i.imgur.com/wmTcTkk.png",
@@ -29,24 +27,21 @@ OpenAI.default = OpenAI.default or {
 OpenAI.default_cfg = OpenAI.default_cfg or [[
 # API Token
 OpenAI: sk-XXXXXXXXXXXXXXXXXXXXX
-
+User: [steamid]
 
 # Images configuracion
 Image_size: 256x256
-Image_user: [steamid]
 
 
 # Chat configuracion
 Chat_model: gpt-3.5-turbo
 Chat_temperature: 1
 Chat_max_tokens: 24
-Chat_user: [steamid]
 
 # Translator configuracion
 Translator_model: gpt-3.5-turbo
 Translator_temperature: 1
 Translator_max_tokens: 24
-Translator_user: [steamid]
 Translator_cmd: ,
 
 
@@ -63,8 +58,7 @@ Discord_name: OpenAI
 #
 # [steamid] = STEAM_X_XXXXXXXXXX
 # [steamid64] = 765XXXXXXXXXXXXX
-# [first_message] = El mensaje colocado en el chat
-
+#
 # Revisa mas aqui V
 # https://platform.openai.com/docs/models/model-endpoint-compatibility
 ]]

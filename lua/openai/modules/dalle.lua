@@ -16,7 +16,7 @@ if CLIENT then
     CreateConVar("openai_image_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Deberias descargar las imagenes del servidor?", 0, 1)
     CreateClientConVar("openai_image_namelength", 32, true, true, "El nombre maximo que puede tener el archivo", 8, 64)
 
-    function OpenAI.imageSetFileName(prompt)
+    function OpenAI.ImageSetFileName(prompt)
         local maxLength = GetConVar("openai_image_namelength"):GetInt()
         local unixtime = os.time()
         local name = prompt:gsub("[%p%c]", ""):gsub("%s+", "_")
@@ -84,22 +84,17 @@ end
         Main Scripts
 ------------------------]]--
 
-function OpenAI.imageFetch(ply, msg)
+function OpenAI.ImageFetch(ply, msg)
 
     local canUse = hook.Run("OpenAI.imagePlyCanUse", ply)
     if canUse == false then return end
 
-    local cfg = OpenAI.FileRead()
-
-    local body = {
-        prompt  = msg,
-        size    = cfg["image_size"],
-        user    = OpenAI.replaceSteamID( cfg["image_user"], ply ),
-    }
-
     local openai = OpenAI.Request()
     openai:SetType("images")
-    openai:SetBody(body)
+    openai:AddBody("prompt", msg)
+    openai:AddBody("size", OpenAI.GetConfig("image_size"))
+    openai:AddBody("user", ply)
+
     openai:SetSuccess(function(code, body)
         OpenAI.HandleCode(code, GetPath())
 
@@ -129,6 +124,7 @@ function OpenAI.imageFetch(ply, msg)
 
     openai:SendRequest()
 end
+OpenAI.imageFetch = OpenAI.ImageFetch
 
 
 --[[------------------------
@@ -158,12 +154,12 @@ end)
 
 hook.Add("PlayerSay", "OpenAI.image", function(ply, text)
 
-    local cmd, prompt = OpenAI.handleCommands(text)
+    local cmd, prompt = OpenAI.HandleCommands(text)
 
     if cmd == nil or cmd ~= "dalle" then return end
     if prompt == nil or #prompt < 1 then return end
 
-    OpenAI.imageFetch(ply, prompt)
+    OpenAI.ImageFetch(ply, prompt)
 
     return image_show:GetBool() and "" or text
 end)

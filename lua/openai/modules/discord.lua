@@ -26,7 +26,7 @@ local cfg = OpenAI.FileRead()
         Main Scripts
 ------------------------]]--
 
-function OpenAI.discordSendMessage(tbl)
+function OpenAI.DiscordSendMessage(tbl)
     if not type(tbl) == "table" then MsgC(c_error, "ERROR", c_normal, ": The argument #1 isn't a table") return end
 
     local useragent = "Garry's Mod OpenAI/1.0 (" .. (system.IsLinux() and "Linux" or system.IsWindows() and "Windows" or "OSX") .. ") User-Agent"
@@ -51,9 +51,8 @@ function OpenAI.discordSendMessage(tbl)
         end
     })
 
-
 end
-
+OpenAI.discordSendMessage = OpenAI.DiscordSendMessage
 
 --[[------------------------
         Chat Fetch
@@ -78,7 +77,7 @@ hook.Add("OpenAI.chatFetch", "OpenAI.discord_chat", function(ply, prompt, respon
     end
 
     if usediscord:GetBool() then
-        OpenAI.discordSendMessage(body)
+        OpenAI.DiscordSendMessage(body)
     end
 end)
 
@@ -109,6 +108,6 @@ hook.Add("OpenAI.imageFetch", "OpenAI.discord_image", function(ply, prompt, resp
     end
 
     if usediscord:GetBool() then
-        OpenAI.discordSendMessage(body)
+        OpenAI.DiscordSendMessage(body)
     end
 end)

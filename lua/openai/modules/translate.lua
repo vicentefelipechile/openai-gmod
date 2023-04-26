@@ -17,7 +17,7 @@ if CLIENT then
         local prompt = net.ReadString()
         local response = net.ReadString()
 
-        OpenAI.chatPrint("[Translate] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, response)
+        OpenAI.ChatPrint("[Translate] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, response)
 
         hook.Call("OpenAI.onTranslateReceive", nil, ply, prompt, response)
     end)
@@ -38,7 +38,7 @@ end
         Main Scripts
 ------------------------]]--
 
-function OpenAI.translateFetch(ply, msg)
+function OpenAI.TranslateFetch(ply, msg)
     local cfg = OpenAI.FileRead()
 
     local canUse = hook.Run("OpenAI.translatePlyCanUse", ply)
@@ -49,19 +49,15 @@ function OpenAI.translateFetch(ply, msg)
 
     local content = string.format("Translate this %s text into %s text\n\n%s", lang_from, lang_to, msg)
 
-    local body = {
-        model       = cfg["translator_model"],
-        messages    = {
-            { role = "user", content = content }
-        },
-        temperature = cfg["translator_temperature"],
-        max_tokens  = cfg["translator_max_tokens"],
-        user        = OpenAI.replaceSteamID( cfg["translator_user"], ply ),
-    }
-
     local openai = OpenAI.Request()
     openai:SetType("chat")
-    openai:SetBody(body)
+    openai:AddBody("model", OpenAI.GetConfig("translator_model"))
+    openai:AddBody("messages", {
+      { role = "user", content = content}  
+    })
+    openai:AddBody("temperature", OpenAI.GetConfig("translator_temperature"))
+    openai:AddBody("max_tokens", OpenAI.GetConfig("translator_max_tokens"))
+    openai:AddBody("user", ply)
     openai:SetSuccess(function(code, body)
         OpenAI.HandleCode(code, GetPath())
 
@@ -114,10 +110,9 @@ hook.Add("PlayerSay", "OpenAI.translate", function(ply, text)
 
     local prefix, prompt = text:sub(1,1), text:sub(1)
 
-    if prefix == OpenAI.FileRead()["translator_cmd"] then
+    if prefix == OpenAI.GetConfig("translator_cmd") then
         if prompt == nil or #prompt < 1 then return end
-        print(1)
-        OpenAI.translateFetch(ply, prompt)
+        OpenAI.TranslateFetch(ply, prompt)
 
         return ""
     end

@@ -3,6 +3,7 @@
 ----------------------------------------------------------------------------]]--
 
 util.AddNetworkString("OpenAI.errorToCL")
+util.AddNetworkString("OpenAI.contentToCL")
 include("openai/server/default.lua")
 
 --[[------------------------
@@ -90,6 +91,10 @@ function OpenAI.GetAPI()
     return header
 end
 
+function OpenAI.GetConfig(str)
+    return OpenAI.FileRead()[str]
+end
+
 -- Generate by AI
 function OpenAI.IntToJson(field, json)
     local pattern = [["]] .. field .. [[":(%d+%.?%d*)]]
@@ -106,7 +111,7 @@ function OpenAI.IntToJson(field, json)
 end
 
 
-function OpenAI.replaceSteamID(text, ply)
+function OpenAI.ReplaceSteamID(text, ply)
     if string.find(text, "%[steamid%]") then
         text = string.gsub(text, "%[steamid%]", ply:SteamID())
     end
@@ -117,82 +122,11 @@ function OpenAI.replaceSteamID(text, ply)
 
     return text
 end
+OpenAI.replaceSteamID = OpenAI.ReplaceSteamID
 
 
 --[[------------------------
         Server Scripts
 ------------------------]]--
 
-local openai = {
-
-    request = {
-        url = "https://api.openai.com",
-        body = {},
-        method = "GET",
-        headers = OpenAI.GetAPI(),
-        type = "application/json",
-        timeout = 25,
-        success = function() end,
-        failed = function() MsgC(COLOR_RED, err, "\n") end,
-    },
-
-    SetType = function(self, type)
-        if not REQUESTS[type] then return end
-
-        local method, url = REQUESTS[type][1], REQUESTS[type][2]
-        self.request["method"] = method
-        self.request["url"] = url
-    end,
-
-    GetType = function(self)
-        return self.request["method"], self.request["url"]
-    end,
-
-    SetBody = function(self, body)
-        self.request["body"] = body
-    end,
-
-    GetBody = function(self)
-        return self.request["body"]
-    end,
-
-    SetSuccess = function(self, func)
-        if not isfunction(func) then return end
-
-        self.request["success"] = func
-    end,
-
-    SetFailed = function(self, func)
-        if not isfunction(func) then return end
-
-        self.request["failed"] = func
-    end,
-
-    GetAll = function(self)
-        local all = table.Copy(self.request)
-        if all["headers"] and all["headers"]["Authorization"] then
-            all["headers"]["Authorization"] = "***PROTECTED***"
-        end
-
-        return all
-    end,
-
-    SendRequest = function(self)
-        local req = table.Copy( self.request )
-        local body = util.TableToJSON(req["body"])
-        
-        if req["body"]["max_tokens"] then
-            body = OpenAI.IntToJson( "max_tokens", body )
-        end
-
-        req["body"] = body
-
-        HTTP(req)
-    end
-}
-openai.__index = openai
-
-
-function OpenAI.Request()
-    return setmetatable( { [ 0 ] = 0 }, openai)
-end
+include("openai/server/modules.lua")

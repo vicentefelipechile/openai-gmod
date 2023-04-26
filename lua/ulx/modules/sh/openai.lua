@@ -12,7 +12,7 @@ function ulx.openaiChat(ply, prompt)
         return
     end
 
-    OpenAI.chatFetch(ply, prompt)
+    OpenAI.ChatFetch(ply, prompt)
 
     ulx.fancyLog(ply, "#P asked to OpenAI: #s", prompt)
 end
@@ -30,7 +30,7 @@ function ulx.openaiImage(ply, prompt)
         return
     end
 
-    OpenAI.imageFetch(ply, prompt)
+    OpenAI.ImageFetch(ply, prompt)
 
     ulx.fancyLog(ply, "#P asked to Dalle: #s", prompt)
 end
