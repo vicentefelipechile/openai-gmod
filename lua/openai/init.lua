@@ -121,7 +121,7 @@ local openai = {
 
         local jsonBody = util.TableToJSON(body)
         if body["max_tokens"] then
-            jsonBody = OpenAI.IntToJson( "max_tokens", body )
+            jsonBody = OpenAI.IntToJson( "max_tokens", jsonBody )
         end
 
         self.request["body"] = jsonBody
