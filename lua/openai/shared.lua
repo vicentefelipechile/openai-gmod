@@ -33,6 +33,12 @@ function OpenAI.print(...)
 end
 
 
+function OpenAI.HandleCode(code, path)
+    local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
+    fCode(path)
+end
+
+
 function OpenAI.handleCommands(str)
     local command, value = str:match("^(%S+)%s+(.*)$")
 

@@ -42,11 +42,6 @@ local folder = "openai"
         Util Scripts
 ------------------------]]--
 
-function OpenAI.HandleCode(code, path)
-    local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-    fCode(path)
-end
-
 function OpenAI.GetAPI()
     local API = OpenAI.FileRead()["openai"] or false
 

@@ -17,7 +17,9 @@ local function pError(p, msg)
 end
 
 local function pOk(p, msg)
-    MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", SERVER and unpack({COLOR_SERVER, "SV"}) or unpack({COLOR_CLIENT, "SV"}), COLOR_WHITE, p, "\n > ", COLOR_GREEN, msg)
+    MsgC( COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] " )
+    MsgC( SERVER and COLOR_SERVER or COLOR_CLIENT, SERVER and "SV " or "CL " )
+    MsgC( COLOR_WHITE, p, "\n > ", COLOR_GREEN, msg )
 end
 
 

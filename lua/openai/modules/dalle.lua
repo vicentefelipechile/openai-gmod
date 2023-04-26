@@ -2,6 +2,10 @@
                                 Dalle Module
 ----------------------------------------------------------------------------]]--
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
+
 local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 if SERVER then
@@ -40,8 +44,7 @@ if CLIENT then
             url = url,
             
             success = function(code, image)
-                local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-                fCode(GetPath())
+                OpenAI.HandleCode(code, GetPath())
 
                 if code == 200 then
                     local path = "openai/image/" .. OpenAI.imageSetFileName(prompt)
@@ -64,10 +67,6 @@ end
 
 local c_error = COLOR_RED
 local c_normal = COLOR_SERVER
-
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
 
 local function getPlayersToSend()
     local tbl = {}
@@ -101,7 +100,9 @@ function OpenAI.imageFetch(ply, msg)
     local openai = OpenAI.Request()
     openai:SetType("images")
     openai:SetBody(body)
-    openai:SetSucces(function(code, body)
+    openai:SetSuccess(function(code, body)
+        OpenAI.HandleCode(code, GetPath())
+
         local json = util.JSONToTable(body)
 
         if code == 200 then
@@ -125,6 +126,8 @@ function OpenAI.imageFetch(ply, msg)
             end
         end
     end)
+
+    openai:SendRequest()
 end
 
 
