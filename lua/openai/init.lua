@@ -3,11 +3,14 @@
 ----------------------------------------------------------------------------]]--
 
 util.AddNetworkString("OpenAI.errorToCL")
---include("openai/server/reqwest.lua")
+include("openai/server/default.lua")
 
 --[[------------------------
       Local Definitions
 ------------------------]]--
+
+local trim = string.Trim
+local start = string.StartsWith
 
 local REQUESTS = {
     -- Main
@@ -41,6 +44,41 @@ local folder = "openai"
 --[[------------------------
         Util Scripts
 ------------------------]]--
+
+
+function OpenAI.FileRead()
+    local cfg = {}
+    local cfg_file = file.Open(folder .. "/openai_config.txt", "r", "DATA")
+
+    if cfg_file == nil then return OpenAI.default end
+
+    while not cfg_file:EndOfFile() do
+        local line = trim( cfg_file:ReadLine() )
+
+        if line == "" or string.sub(line, 1, 1) == "#" then continue end
+
+        local key, value = string.match(line, "(%S+):%s*(.*)")
+        if key == nil or value == nil then continue end
+
+        key, value = string.lower( trim(key) ), trim(value)
+        if tonumber(value) then
+            value = tonumber(value)
+        end
+
+        cfg[key] = cfg[key] or value
+    end
+
+    cfg_file:Close()
+
+    for k, v in pairs( OpenAI.default ) do
+        if cfg[k] == nil then
+            cfg[k] = v
+        end
+    end
+
+    return cfg
+end
+
 
 function OpenAI.GetAPI()
     local API = OpenAI.FileRead()["openai"] or false

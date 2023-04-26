@@ -2,7 +2,7 @@
                                 translate Module
 ----------------------------------------------------------------------------]]--
 
-CreateConVar("openai_translate_enabled", 0, FCVAR_NOTIFY, FCVAR_ARCHIVE, "Enable the translation module", 0, 1)
+CreateConVar("openai_translate_enabled", 0, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Enable the translation module", 0, 1)
 
 if SERVER then
     util.AddNetworkString("openai.translateSVtoCL")
