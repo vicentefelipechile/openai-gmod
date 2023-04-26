@@ -2,10 +2,6 @@
                                 translate Module
 ----------------------------------------------------------------------------]]--
 
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
-
 if SERVER then
     util.AddNetworkString("openai.translateSVtoCL")
 end
@@ -31,6 +27,10 @@ end
       Local Definitions
 ------------------------]]--
 
+
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
 
 local cfg = OpenAI.FileRead()
 local API = cfg["openai"] or false
