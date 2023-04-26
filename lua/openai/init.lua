@@ -3,7 +3,6 @@
 ----------------------------------------------------------------------------]]--
 
 util.AddNetworkString("OpenAI.errorToCL")
-util.AddNetworkString("OpenAI.contentToCL")
 include("openai/server/default.lua")
 
 --[[------------------------
