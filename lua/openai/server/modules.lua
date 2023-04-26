@@ -51,6 +51,14 @@ local openai = {
         return self.request["body"]
     end,
 
+    SetHeaders = function(self, header)
+        self.request["headers"] = header
+    end,
+
+    GetHeaders = function(self)
+        return self.request["headers"]
+    end,
+
     SetSuccess = function(self, func)
         if not isfunction(func) then
             error( "bad argument #1 to 'openai:SetSuccess' (function expected, got " .. type( body ) .. ")" )

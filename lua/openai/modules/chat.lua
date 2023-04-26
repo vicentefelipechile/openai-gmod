@@ -70,7 +70,7 @@ function OpenAI.ChatFetch(ply, msg)
     openai:AddBody("user", ply)
 
     openai:SetSuccess(function(code, body)
-        OpenAI.HandleCode(code, GetPath())
+        OpenAI.HandleCode(code)
 
         local json = util.JSONToTable( string.Trim( body ) )
 

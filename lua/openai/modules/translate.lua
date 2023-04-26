@@ -29,10 +29,6 @@ end
       Local Definitions
 ------------------------]]--
 
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
-
 
 --[[------------------------
         Main Scripts
@@ -58,8 +54,9 @@ function OpenAI.TranslateFetch(ply, msg)
     openai:AddBody("temperature", OpenAI.GetConfig("translator_temperature"))
     openai:AddBody("max_tokens", OpenAI.GetConfig("translator_max_tokens"))
     openai:AddBody("user", ply)
+
     openai:SetSuccess(function(code, body)
-        OpenAI.HandleCode(code, GetPath())
+        OpenAI.HandleCode(code)
 
         local json = util.JSONToTable( string.Trim( body ) )
 
@@ -75,6 +72,9 @@ function OpenAI.TranslateFetch(ply, msg)
             net.Broadcast()
 
             hook.Call("OpenAI.translateFetch", nil, ply, msg, response)
+        elseif code >= 400 then
+            mError = json["error"]["message"]
+            MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
         end
     end)
 

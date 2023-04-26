@@ -2,10 +2,6 @@
                                 Dalle Module
 ----------------------------------------------------------------------------]]--
 
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
-
 local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 if SERVER then
@@ -27,6 +23,7 @@ if CLIENT then
         
         return string.format("%d_%s.png", unixtime, name)
     end
+    OpenAI.imageSetFileName = OpenAI.ImageSetFileName
 
 
     if not file.Exists("openai/image", "DATA") then
@@ -44,10 +41,10 @@ if CLIENT then
             url = url,
             
             success = function(code, image)
-                OpenAI.HandleCode(code, GetPath())
+                OpenAI.HandleCode(code)
 
                 if code == 200 then
-                    local path = "openai/image/" .. OpenAI.imageSetFileName(prompt)
+                    local path = "openai/image/" .. OpenAI.ImageSetFileName(prompt)
                     file.Write(path, image)
 
                     hook.Call("OpenAI.onImageDownloaded", nil, ply, path, prompt)
@@ -96,7 +93,7 @@ function OpenAI.ImageFetch(ply, msg)
     openai:AddBody("user", ply)
 
     openai:SetSuccess(function(code, body)
-        OpenAI.HandleCode(code, GetPath())
+        OpenAI.HandleCode(code)
 
         local json = util.JSONToTable(body)
 
@@ -112,7 +109,9 @@ function OpenAI.ImageFetch(ply, msg)
             hook.Call("OpenAI.imageFetch", nil, ply, msg, response)
         elseif code == 400 then
             mError = json["error"]["message"]
-            MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
+            MsgC(COLOR_WHITE, " > ", COLOR_RED, mError, "\n")
+
+            PrintTable(openai:GetAll())
 
             if GetConVar("openai_displayerrorcl"):GetBool() then
                 net.Start("OpenAI.errorToCL")

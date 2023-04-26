@@ -16,6 +16,32 @@ function OpenAI.Print(...)
 end
 
 
+function OpenAI.SetFileName(name, format, dir)
+    local unixtime = os.time()
+    local name = name:gsub("[%p%c]", ""):gsub("%s+", "_")
+
+    if dir and not file.Exists("openai/" .. dir, "DATA") then
+        file.CreateDir("openai/" .. dir)
+    end
+    
+    if format == nil then
+        format = ".dat"
+    end
+
+    if not ( format:sub(0,1) == "." ) then
+        format = "." .. format
+    end
+
+    if name:len() > 32 then
+        name = name:sub(1, 32)
+    end
+
+    local format = "openai/" .. ( dir == nil and "" or dir .. "/" ) .. "%d_%s" .. format
+    
+    return string.format(format, unixtime, name)
+end
+
+
 function OpenAI.HandleCommands(str)
     local command, value = str:match("^(%S+)%s+(.*)$")
 

@@ -44,6 +44,10 @@ local folder = "openai"
         Util Scripts
 ------------------------]]--
 
+function OpenAI.GetCurrentPath()
+    return string.GetFileFromFilename( debug.getinfo(2, "S")["short_src"] )
+end
+
 
 function OpenAI.FileRead()
     local cfg = {}

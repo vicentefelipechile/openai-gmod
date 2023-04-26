@@ -77,6 +77,8 @@ OpenAI.HTTPcode = {
 }
 
 function OpenAI.HandleCode(code, path)
+    path = path or string.GetFileFromFilename( debug.getinfo(2, "S")["short_src"] )
+
     local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
     fCode(path)
 end
