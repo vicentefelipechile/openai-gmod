@@ -81,10 +81,8 @@ end
 
 
 --[[------------------------
-        Util Scripts
+        Server Scripts
 ------------------------]]--
-
-
 
 local openai = {
 
@@ -159,6 +157,7 @@ openai.__index = openai
 function OpenAI.Request()
     return setmetatable( { [ 0 ] = 0 }, openai)
 end
+
 
 function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
     if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end

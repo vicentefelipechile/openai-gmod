@@ -2,6 +2,8 @@
                                 translate Module
 ----------------------------------------------------------------------------]]--
 
+CreateConVar("openai_translate_enabled", 0, FCVAR_NOTIFY, FCVAR_ARCHIVE, "Enable the translation module", 0, 1)
+
 if SERVER then
     util.AddNetworkString("openai.translateSVtoCL")
 end
@@ -27,17 +29,9 @@ end
       Local Definitions
 ------------------------]]--
 
-
 local function GetPath()
     return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
 end
-
-local cfg = OpenAI.FileRead()
-local API = cfg["openai"] or false
-
-local header = API and {
-    ["Authorization"] = "Bearer " .. API,
-}
 
 
 --[[------------------------
@@ -45,7 +39,7 @@ local header = API and {
 ------------------------]]--
 
 function OpenAI.translateFetch(ply, msg)
-    if not API then return end
+    local cfg = OpenAI.FileRead()
 
     local canUse = hook.Run("OpenAI.translatePlyCanUse", ply)
     if canUse == false then return end
@@ -55,7 +49,7 @@ function OpenAI.translateFetch(ply, msg)
 
     local content = string.format("Generate a translation from %s to %s\n%s: %s\n%s:", lang_from, lang_to, lang_from, msg, lang_to)
 
-    local body = util.TableToJSON({
+    local body = {
         model       = cfg["translator_model"],
         messages    = {
             { role = "user", content = content }
@@ -63,13 +57,13 @@ function OpenAI.translateFetch(ply, msg)
         temperature = tonumber(cfg["translator_temperature"]),
         max_tokens  = tonumber(cfg["translator_max_tokens"]),
         user        = OpenAI.replaceSteamID( cfg["translator_user"], ply ),
-    })
+    }
 
-    local jsonBody = OpenAI.IntToJson("max_tokens", body )
-
-    OpenAI.HTTP("chat", jsonBody, header, function(code, body)
-        local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode(GetPath())
+    local openai = OpenAI.Request()
+    openai:SetType("chat")
+    openai:SetBody(body)
+    openai:SetSuccess(function(code, body)
+        OpenAI.HandleCode(code, GetPath())
 
         local json = util.JSONToTable( string.Trim( body ) )
 
@@ -83,28 +77,9 @@ function OpenAI.translateFetch(ply, msg)
             net.Broadcast()
 
             hook.Call("OpenAI.translateFetch", nil, ply, msg, response)
-        elseif code == 400 then
-            mError = json["error"]["message"]
-            MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
-
-            if GetConVar("openai_displayerrorcl"):GetBool() then
-                net.Start("OpenAI.errorToCL")
-                    net.WriteString(json["error"]["message"])
-                net.Send(ply)
-            end
-
         end
-
-    end,
-    function(err)
-        MsgC(COLOR_RED, err)
     end)
 end
-
-
-concommand.Add("openai_translate_reloadconfig", function()
-    cfg = OpenAI.FileRead()
-end)
 
 
 --[[------------------------
