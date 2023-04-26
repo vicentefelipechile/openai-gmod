@@ -144,7 +144,12 @@ local openai = {
     end,
 
     GetAll = function(self)
-        return self.request
+        local all = table.Copy(self.request)
+        if all["headers"] and all["headers"]["Authorization"] then
+            all["headers"]["Authorization"] = "***PROTECTED***"
+        end
+
+        return all
     end,
 
     SendRequest = function(self)
