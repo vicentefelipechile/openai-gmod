@@ -66,7 +66,7 @@ function OpenAI.TranslateFetch(ply, msg)
         if code == 200 then
             local response = string.Trim(json["choices"][1]["message"]["content"])
 
-            response = string.gsub(response, [[^%"(.-)%"$]], "%1")
+            response = string.gsub(response, [[^[%s",%.]*(.-)[%s",%.]*$]], "%1")
 
             net.Start("openai.translateSVtoCL")
                 net.WriteEntity(ply)

@@ -2,6 +2,8 @@
                                 Modules Module
 ----------------------------------------------------------------------------]]--
 
+local REQUESTS = OpenAI.REQUESTS
+
 --[[------------------------
         Module Class
 ------------------------]]--
@@ -42,16 +44,8 @@ local openai = {
     end,
 
     AddBody = function(self, key, value)
-        if not isstring(key) then
-            error( "bad argument #1 to 'openai:AddBody' (string expected, got " .. type( key ) .. ")" )
-        elseif value == nil then
-            error( "bad argument #2 to 'openai:AddBody' (Any expected, got nil)" )
-        elseif #value == 0 then
-            error( "bad argument #1 to #2 to 'openai:AddBody' (Any cannot be empty)" )
-        end
-
         self.request["body"][key] = value
-    end
+    end,
 
     GetBody = function(self)
         return self.request["body"]

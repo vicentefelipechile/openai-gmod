@@ -12,7 +12,7 @@ include("openai/server/default.lua")
 local trim = string.Trim
 local start = string.StartsWith
 
-local REQUESTS = {
+OpenAI.REQUESTS = {
     -- Main
     ["models"]      = {"GET", "https://api.openai.com/v1/models"},                  -- https://platform.openai.com/docs/api-reference/models
     ["completions"] = {"POST", "https://api.openai.com/v1/completions"},            -- https://platform.openai.com/docs/api-reference/completions
@@ -31,8 +31,6 @@ local REQUESTS = {
     ["delete"]      = {"DELETE", "https://api.openai.com/v1/files/"},               -- https://platform.openai.com/docs/api-reference/files/delete
     ["retrieve"]    = {"GET", "https://api.openai.com/v1/files/"},                  -- https://platform.openai.com/docs/api-reference/files/retrieve
 }
-
-OpenAI.REQUESTS = REQUESTS
 
 local c_ok = COLOR_GREEN
 local c_error = COLOR_RED
