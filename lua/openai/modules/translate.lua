@@ -47,7 +47,7 @@ function OpenAI.translateFetch(ply, msg)
     local lang_from = ply:GetInfo("openai_translate_from")
     local lang_to = ply:GetInfo("openai_translate_to")
 
-    local content = string.format("Generate a translation from %s to %s\n%s: %s\n%s:", lang_from, lang_to, lang_from, msg, lang_to)
+    local content = string.format("Translate this %s text into %s text\n\n%s", lang_from, lang_to, msg)
 
     local body = {
         model       = cfg["translator_model"],
@@ -68,7 +68,9 @@ function OpenAI.translateFetch(ply, msg)
         local json = util.JSONToTable( string.Trim( body ) )
 
         if code == 200 then
-            local response = json["choices"][1]["message"]["content"]
+            local response = string.Trim(json["choices"][1]["message"]["content"])
+
+            response = string.gsub(response, [[^%"(.-)%"$]], "%1")
 
             net.Start("openai.translateSVtoCL")
                 net.WriteEntity(ply)
@@ -79,6 +81,8 @@ function OpenAI.translateFetch(ply, msg)
             hook.Call("OpenAI.translateFetch", nil, ply, msg, response)
         end
     end)
+
+    openai:SendRequest()
 end
 
 
@@ -108,12 +112,14 @@ end)
 
 hook.Add("PlayerSay", "OpenAI.translate", function(ply, text)
 
-    local prefix, prompt = text:sub(1,1)
+    local prefix, prompt = text:sub(1,1), text:sub(1)
 
-    if prefix == nil or cmd ~= cfg["translator_cmd"] then return end
-    if prompt == nil or #prompt < 1 then return end
+    if prefix == OpenAI.FileRead()["translator_cmd"] then
+        if prompt == nil or #prompt < 1 then return end
+        print(1)
+        OpenAI.translateFetch(ply, prompt)
 
-    OpenAI.translateFetch(ply, prompt)
+        return ""
+    end
 
-    return ""
 end)
