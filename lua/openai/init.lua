@@ -88,7 +88,7 @@ local openai = {
 
     request = {
         url = "https://api.openai.com",
-        body = util.TableToJSON({}),
+        body = {},
         method = "GET",
         headers = OpenAI.GetAPI(),
         type = "application/json",
@@ -110,14 +110,7 @@ local openai = {
     end,
 
     SetBody = function(self, body)
-        if not istable(body) then return end
-
-        local jsonBody = util.TableToJSON(body)
-        if body["max_tokens"] then
-            jsonBody = OpenAI.IntToJson( "max_tokens", jsonBody )
-        end
-
-        self.request["body"] = jsonBody
+        self.request["body"] = body
     end,
 
     GetBody = function(self)
@@ -146,7 +139,14 @@ local openai = {
     end,
 
     SendRequest = function(self)
-        local req = self.request
+        local req = table.Copy( self.request )
+        local body = util.TableToJSON(req["body"])
+        
+        if req["body"]["max_tokens"] then
+            body = OpenAI.IntToJson( "max_tokens", body )
+        end
+
+        req["body"] = body
 
         HTTP(req)
     end
@@ -156,34 +156,4 @@ openai.__index = openai
 
 function OpenAI.Request()
     return setmetatable( { [ 0 ] = 0 }, openai)
-end
-
-
-function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
-    if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
-
-    local method, url = REQUESTS[request][1], REQUESTS[request][2]
-
-    if not context == nil then
-        url = url .. context
-    end
-
-    HTTP({
-        url = url,
-        body = body or util.TableToJSON({}),
-        method = method,
-        headers = headers or {},
-        type = "application/json",
-        timeout = 25,
-
-        success = function(code, body, headers)
-            if ( !onsuccess ) then return end
-            onsuccess( code, body, headers )
-        end,
-      
-        failed = function( err )
-            if ( !onfailure ) then return end
-            onfailure( err )
-        end
-    })
 end

@@ -5,11 +5,11 @@
 local defaultinfo = CreateConVar("openai_discord_usedefaultwebhookinfo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Use the default info from Discord instead of replace it", 0, 1)
 local usediscord = CreateConVar("openai_discord_enable", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE, FCVAR_PROTECTED}, "Enable the discord webhook", 0, 1)
 
+if CLIENT then return end
+
 local function GetPath()
     return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
 end
-
-if CLIENT then return end
 
 --[[------------------------
       Local Definitions

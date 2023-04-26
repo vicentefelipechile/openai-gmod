@@ -54,8 +54,8 @@ function OpenAI.translateFetch(ply, msg)
         messages    = {
             { role = "user", content = content }
         },
-        temperature = tonumber(cfg["translator_temperature"]),
-        max_tokens  = tonumber(cfg["translator_max_tokens"]),
+        temperature = cfg["translator_temperature"],
+        max_tokens  = cfg["translator_max_tokens"],
         user        = OpenAI.replaceSteamID( cfg["translator_user"], ply ),
     }
 

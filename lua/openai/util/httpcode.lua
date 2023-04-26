@@ -75,3 +75,8 @@ OpenAI.HTTPcode = {
     [507] = function(p) pError(p, "507 - Insufficient Storage") pMsg("This operation couldn't succeed, maybe because the request it's too large to fit on a disk") end,
     [508] = function(p) pError(p, "508 - Loop Detected") pMsg("It indicates that the server terminated an operation because it encountered an infinite loop while processing a request with \"Depth: infinity\"") eMsg("This status indicates that the entire operation failed") end,
 }
+
+function OpenAI.HandleCode(code, path)
+    local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
+    fCode(path)
+end

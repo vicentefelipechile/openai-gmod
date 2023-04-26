@@ -58,8 +58,8 @@ function OpenAI.chatFetch(ply, msg)
         messages    = {
             { role = "user", content = msg }
         },
-        temperature = tonumber(cfg["chat_temperature"]),
-        max_tokens  = tonumber(cfg["chat_max_tokens"]),
+        temperature = cfg["chat_temperature"],
+        max_tokens  = cfg["chat_max_tokens"],
         user        = OpenAI.replaceSteamID( cfg["chat_user"], ply ),
     }
 
