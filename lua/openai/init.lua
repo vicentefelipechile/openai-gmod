@@ -47,6 +47,15 @@ function OpenAI.HandleCode(code, path)
     fCode(path)
 end
 
+function OpenAI.GetAPI()
+    local API = OpenAI.FileRead()["openai"] or false
+
+    local header = API == false and {} or { 
+        ["Authorization"] = "Bearer " .. API,
+    }
+    return header
+end
+
 -- Generate by AI
 function OpenAI.IntToJson(field, json)
     local pattern = [["]] .. field .. [[":(%d+%.?%d*)]]
@@ -88,7 +97,7 @@ local openai = {
         url = "https://api.openai.com",
         body = util.TableToJSON({}),
         method = "GET",
-        headers = {},
+        headers = OpenAI.GetAPI(),
         type = "application/json",
         timeout = 25,
         success = function() end,

@@ -32,17 +32,8 @@ end
       Local Definitions
 ------------------------]]--
 
-
-local cfg = OpenAI.FileRead()
-local API = cfg["openai"] or false
-
-local header = API and {
-    ["Authorization"] = "Bearer " .. API,
-}
-
 local c_error = COLOR_RED
 local c_normal = COLOR_SERVER
-
 
 do
     if not file.Exists("openai/chat", "DATA") then
@@ -56,10 +47,11 @@ end
 ------------------------]]--
 
 function OpenAI.chatFetch(ply, msg)
-    if not API then return end
 
     local canUse = hook.Run("OpenAI.chatPlyCanUse", ply)
     if canUse == false then return end
+
+    local cfg = OpenAI.FileRead()
 
     local body = {
         model       = cfg["chat_model"],

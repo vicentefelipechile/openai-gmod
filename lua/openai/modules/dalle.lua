@@ -4,10 +4,6 @@
 
 local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
-
 if SERVER then
     util.AddNetworkString("openai.imageSVtoCL")
 end
@@ -66,16 +62,12 @@ end
       Local Definitions
 ------------------------]]--
 
-
-local API = OpenAI.FileRead()["openai"] or false
-
-local header = API and {
-    ["Authorization"] = "Bearer " .. API,
-}
-
 local c_error = COLOR_RED
 local c_normal = COLOR_SERVER
 
+local function GetPath()
+    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
+end
 
 local function getPlayersToSend()
     local tbl = {}
@@ -93,26 +85,24 @@ end
         Main Scripts
 ------------------------]]--
 
-local download = CreateConVar("openai_image_downloadserver", 1, FCVAR_ARCHIVE, "Should the server download the images?", 0, 1)
 function OpenAI.imageFetch(ply, msg)
-    if not API then return end
 
     local canUse = hook.Run("OpenAI.imagePlyCanUse", ply)
     if canUse == false then return end
 
     local cfg = OpenAI.FileRead()
 
-    local body = util.TableToJSON({
+    local body = {
         prompt  = msg,
         size    = cfg["image_size"],
         user    = OpenAI.replaceSteamID( cfg["image_user"], ply ),
-    })
+    }
 
-    OpenAI.HTTP("images", body, header, function(code, body)
-        local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode(GetPath())
-
-        local json = util.JSONToTable( string.Trim( body ) )
+    local openai = OpenAI.Request()
+    openai:SetType("images")
+    openai:SetBody(body)
+    openai:SetSucces(function(code, body)
+        local json = util.JSONToTable(body)
 
         if code == 200 then
             local response = json["data"][1]["url"]
@@ -133,11 +123,7 @@ function OpenAI.imageFetch(ply, msg)
                     net.WriteString(json["error"]["message"])
                 net.Send(ply)
             end
-
         end
-    end,
-    function(err)
-        MsgC(COLOR_RED, err)
     end)
 end
 
