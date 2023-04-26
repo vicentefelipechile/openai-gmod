@@ -37,11 +37,119 @@ local c_important = COLOR_MENU
 
 local folder = "openai"
 
-local cfg = OpenAI.FileRead()
 
 --[[------------------------
-        Server Scripts
+        Util Scripts
 ------------------------]]--
+
+function OpenAI.HandleCode(code, path)
+    local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
+    fCode(path)
+end
+
+-- Generate by AI
+function OpenAI.IntToJson(field, json)
+    local pattern = [["]] .. field .. [[":(%d+%.?%d*)]]
+    local fieldValue = string.match(json, pattern)
+
+    if fieldValue then
+        local fieldNumber = tonumber(fieldValue)
+        fieldNumber = math.floor(fieldNumber)
+        local convertedJsonString = string.gsub(json, pattern, [["]] .. field .. [[":]] .. fieldNumber)
+        return convertedJsonString
+    else
+        return json
+    end
+end
+
+
+function OpenAI.replaceSteamID(text, ply)
+    if string.find(text, "%[steamid%]") then
+        text = string.gsub(text, "%[steamid%]", ply:SteamID())
+    end
+
+    if string.find(text, "%[steamid64%]") then
+        text = string.gsub(text, "%[steamid64%]", ply:SteamID64())
+    end
+
+    return text
+end
+
+
+--[[------------------------
+        Util Scripts
+------------------------]]--
+
+
+
+local openai = {
+
+    request = {
+        url = "https://api.openai.com",
+        body = util.TableToJSON({}),
+        method = "GET",
+        headers = {},
+        type = "application/json",
+        timeout = 25,
+        success = function() end,
+        failed = function() MsgC(COLOR_RED, err, "\n") end,
+    },
+
+    SetType = function(self, type)
+        if not REQUESTS[type] then return end
+
+        local method, url = REQUESTS[type][1], REQUESTS[type][2]
+        self.request["method"] = method
+        self.request["url"] = url
+    end,
+
+    GetType = function(self)
+        return self.request["method"], self.request["url"]
+    end,
+
+    SetBody = function(self, body)
+        if not istable(body) then return end
+
+        local jsonBody = util.TableToJSON(body)
+        if body["max_tokens"] then
+            jsonBody = OpenAI.IntToJson( "max_tokens", body )
+        end
+
+        self.request["body"] = jsonBody
+    end,
+
+    GetBody = function(self)
+        return self.request["body"]
+    end,
+
+    SetSuccess = function(self, func)
+        if not isfunction(func) then return end
+
+        self.request["success"] = func
+    end,
+
+    SetFailed = function(self, func)
+        if not isfunction(func) then return end
+
+        self.request["failed"] = func
+    end,
+
+    GetAll = function(self)
+        return self.request
+    end,
+
+    SendRequest = function(self)
+        local req = self.request
+
+        HTTP(req)
+    end
+}
+openai.__index = openai
+
+
+function OpenAI.Request()
+    return setmetatable( { [ 0 ] = 0 }, openai)
+end
 
 function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
     if not REQUESTS[request] then MsgC(c_error, "ERROR", c_normal, ": The request type isn't valid or isn't allowed") return end
@@ -70,33 +178,4 @@ function OpenAI.HTTP(request, body, headers, onsuccess, onfailure, context)
             onfailure( err )
         end
     })
-end
-
-
--- Generate by AI
-function OpenAI.IntToJson(field, json)
-    local pattern = [["]] .. field .. [[":(%d+%.?%d*)]]
-    local fieldValue = string.match(json, pattern)
-
-    if fieldValue then
-        local fieldNumber = tonumber(fieldValue)
-        fieldNumber = math.floor(fieldNumber)
-        local convertedJsonString = string.gsub(json, pattern, [["]] .. field .. [[":]] .. fieldNumber)
-        return convertedJsonString
-    else
-        return json
-    end
-end
-
-
-function OpenAI.replaceSteamID(text, ply)
-    if string.find(text, "%[steamid%]") then
-        text = string.gsub(text, "%[steamid%]", ply:SteamID())
-    end
-
-    if string.find(text, "%[steamid64%]") then
-        text = string.gsub(text, "%[steamid64%]", ply:SteamID64())
-    end
-
-    return text
 end

@@ -92,12 +92,15 @@ if SERVER then
             if key == nil or value == nil then continue end
     
             key, value = string.lower( trim(key) ), trim(value)
+            if tonumber(value) then
+                value = tonumber(value)
+            end
     
             cfg[key] = cfg[key] or value
         end
-    
+
         cfg_file:Close()
-    
+
         for k, v in pairs( OpenAI.default ) do
             if cfg[k] == nil then
                 cfg[k] = v

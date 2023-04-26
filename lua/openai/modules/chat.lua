@@ -61,7 +61,7 @@ function OpenAI.chatFetch(ply, msg)
     local canUse = hook.Run("OpenAI.chatPlyCanUse", ply)
     if canUse == false then return end
 
-    local body = util.TableToJSON({
+    local body = {
         model       = cfg["chat_model"],
         messages    = {
             { role = "user", content = msg }
@@ -69,14 +69,13 @@ function OpenAI.chatFetch(ply, msg)
         temperature = tonumber(cfg["chat_temperature"]),
         max_tokens  = tonumber(cfg["chat_max_tokens"]),
         user        = OpenAI.replaceSteamID( cfg["chat_user"], ply ),
-    })
+    }
 
-
-    local jsonBody = OpenAI.IntToJson("max_tokens", body )
-
-    OpenAI.HTTP("chat", jsonBody, header, function(code, body)
-        local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-        fCode(GetPath())
+    local openai = OpenAI.Request()
+    openai:SetType("chat")
+    openai:SetBody(body)
+    openai:SetSuccess(function(code, body)
+        OpenAI.HandleCode(code, GetPath())
 
         local json = util.JSONToTable( string.Trim( body ) )
 
@@ -99,19 +98,12 @@ function OpenAI.chatFetch(ply, msg)
                     net.WriteString(json["error"]["message"])
                 net.Send(ply)
             end
-
         end
-
-    end,
-    function(err)
-        MsgC(COLOR_RED, err)
     end)
+
+    openai:SendRequest()
 end
 
-
-concommand.Add("openai_chat_reloadconfig", function()
-    cfg = OpenAI.FileRead()
-end)
 
 
 --[[------------------------
