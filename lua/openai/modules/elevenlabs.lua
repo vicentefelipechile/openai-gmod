@@ -16,8 +16,6 @@ end
 
 if SERVER then
       util.AddNetworkString("OpenAI.elevenlabsToCL")
-
-      
 else
       CreateConVar("openai_elevenlabs_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Set on to download al sound files from elevenlabs module", 0, 1)
 
@@ -44,8 +42,9 @@ else
                               local path = OpenAI.SetFileName("voice", ".mp3", "elevenlabs")
                               file.Write( path, body )
 
-                              sound.PlayFile("data/" .. path, "noplay", function(station, errCode, errStr)
+                              sound.PlayFile("data/" .. path, "3d noplay", function(station, errCode, errStr)
                                     if IsValid(station) then
+                                          station:SetPos( IsValid(ply) and ply:GetPos() or LocalPlayer():GetPos() )
                                           station:Play()
                                     else
                                           print("We can't :/")
