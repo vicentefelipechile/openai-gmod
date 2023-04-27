@@ -47,11 +47,9 @@ else
                                           local who = IsValid(ply) and ply or LocalPlayer()
                                           station:SetPos( who:GetPos() )
                                           station:SetParent( who )
+                                          station:SetVolume(4)
                                           station:Play()
-                                    else
-                                          print("We can't :/")
                                     end
-                                    
                               end)
                         end
                   end,
@@ -92,14 +90,8 @@ end
 ------------------------]]--
 
 function OpenAI.ElevenlabsTTS(ply, msg)
-      if not enabled:GetBool() then return end
 
       local API = OpenAI.GetConfig("elevenlabs")
-
-      if not API then return end
-
-      local canUse = hook.Call("OpenAI.ElevenlabsTTT.CanUse", ply)
-      if canUse == false then return end
 
       local headers = {
             ["Accept"] = "audio/mpeg",
@@ -107,34 +99,39 @@ function OpenAI.ElevenlabsTTS(ply, msg)
             ["xi-api-key"] = API
       }
 
-      local request = OpenAI.Request()
-      request:SetType("elevenlabs")
-      request:SetHeaders(headers)
-      request:AddBody("text", msg)
-
-      request:SetSuccess(function(code, body, header)
-            OpenAI.HandleCode(code)
-            
-            local newRequest = OpenAI.Request()
-            newRequest:SetType("elevenlabs.history")
-            newRequest:SetHeaders({ ["xi-api-key"] = API })
-            newRequest:SetSuccess(function(code, body)
+      HTTP({
+            url         = OpenAI.REQUESTS["elevenlabs"][2],
+            method      = OpenAI.REQUESTS["elevenlabs"][1],
+            body        = util.TableToJSON({ text = msg }),
+            headers     = headers,
+            type        = "application/json",
+            success     = function(code, body, header)
                   OpenAI.HandleCode(code)
-
-                  local json = util.JSONToTable(body)
-                  if code == 200 then
-                        local history = json["history"][1]["history_item_id"]
-
-                        net.Start("OpenAI.elevenlabsToCL")
-                              net.WriteEntity(ply)
-                              net.WriteString(msg)
-                              net.WriteString(history)
-                              net.WriteString(API)
-                        net.Send(GetPlayersToSend())
-                  end
-            end)
-            newRequest:SendRequest()
-      end)
-
-      request:SendRequest()
+                  
+                  HTTP({
+                        url         = OpenAI.REQUESTS["elevenlabs.history"][2],
+                        method      = OpenAI.REQUESTS["elevenlabs.history"][1],
+                        headers     = { ["xi-api-key"] = API },
+                        body        = util.TableToJSON({}),
+                        success     = function(code, body)
+                              OpenAI.HandleCode(code)
+            
+                              local json = util.JSONToTable(body)
+                              if code == 200 then
+                                    local history = json["history"][1]["history_item_id"]
+            
+                                    net.Start("OpenAI.elevenlabsToCL")
+                                          net.WriteEntity(ply)
+                                          net.WriteString(msg)
+                                          net.WriteString(history)
+                                          net.WriteString(API)
+                                          net.WriteVector(ply:GetPos())
+                                    net.Broadcast()
+                              end
+                        end,
+                        failed      = function() end
+                  })
+            end,
+            failed      = function() end
+      })
 end
