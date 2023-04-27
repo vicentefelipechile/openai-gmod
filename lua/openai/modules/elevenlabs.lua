@@ -44,7 +44,9 @@ else
 
                               sound.PlayFile("data/" .. path, "3d noplay", function(station, errCode, errStr)
                                     if IsValid(station) then
-                                          station:SetPos( IsValid(ply) and ply:GetPos() or LocalPlayer():GetPos() )
+                                          local who = IsValid(ply) and ply or LocalPlayer()
+                                          station:SetPos( who:GetPos() )
+                                          station:SetParent( who )
                                           station:Play()
                                     else
                                           print("We can't :/")
