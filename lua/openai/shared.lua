@@ -12,20 +12,21 @@ CreateConVar("openai_displayerrorcl", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_
 function OpenAI.Print(...)
     local color = SERVER and COLOR_SERVER or COLOR_CLIENT
 
-    MsgC(color, unpack({...}), "\n")
+    MsgC(color, unpack({...}))
+    MsgC("\n")
 end
 
 
 function OpenAI.SetFileName(name, format, dir)
     local unixtime = os.time()
-    local name = name:gsub("[%p%c]", ""):gsub("%s+", "_")
+    local name = string.lower( name:gsub("[%p%c]", ""):gsub("%s+", "_") )
 
     if dir and not file.Exists("openai/" .. dir, "DATA") then
         file.CreateDir("openai/" .. dir)
     end
     
     if format == nil then
-        format = ".dat"
+        format = ".txt"
     end
 
     if not ( format:sub(0,1) == "." ) then
