@@ -25,7 +25,9 @@ OpenAI.default = OpenAI.default or {
 }
 
 OpenAI.default_cfg = OpenAI.default_cfg or [[
-# API Token
+#################
+#    API Token  #
+#################
 OpenAI: sk-XXXXXXXXXXXXXXXXXXXXX
 User: [steamid]
 
@@ -43,6 +45,7 @@ Translator_model: gpt-3.5-turbo
 Translator_temperature: 1
 Translator_max_tokens: 24
 Translator_cmd: ,
+
 
 
 # Discord Webhook

@@ -46,6 +46,7 @@ OpenAI.HTTPcode = {
     [401] = function(p)
         pError(p, "401 - Unauthorized") pMsg("Authentication is required to get the requested response")
         eMsg("Look at this page for more info: https://platform.openai.com/docs/guides/error-codes/error-codes")
+        eMsg("If you are using Elevenlabs, see this page: https://docs.elevenlabs.io/api-reference/text-to-speech")
     end,
     [403] = function(p) pError(p, "403 - Forbidden") pMsg("You don't have the necessary permissions for certain content, so the server is refusing to grant an appropriate response") end,
     [404] = function(p) pError(p, "404 - Not Found") pMsg("The server was unable to find the requested content") end,

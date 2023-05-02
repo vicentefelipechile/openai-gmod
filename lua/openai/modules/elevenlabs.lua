@@ -18,9 +18,11 @@ end
 if SERVER then
       util.AddNetworkString("OpenAI.elevenlabsToCL")
 else
-      CreateConVar("openai_elevenlabs_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Set on to download al sound files from elevenlabs module", 0, 1)
+      download = CreateConVar("openai_elevenlabs_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Set on to download al sound files from elevenlabs module", 0, 1)
 
       net.Receive("OpenAI.elevenlabsToCL", function()
+            if not download:GetBool() then return end
+
             local ply = net.ReadEntity()
             local prompt = net.ReadString()
             local history = net.ReadString()
@@ -51,12 +53,13 @@ else
                                           station:Play()
                                     end
                               end)
+
+                              hook.Call("OpenAI.Elevenlabs.OnGetFile", ply, path)
                         end
                   end,
                   failed = function() end
             })
 
-            hook.Call("OpenAI.")
       end)
 
       return
@@ -82,19 +85,6 @@ local voices = {
 
 OpenAI.REQUESTS["elevenlabs"] = { "POST", "https://api.elevenlabs.io/v1/text-to-speech/" }
 OpenAI.REQUESTS["elevenlabs.history"] = { "GET", "https://api.elevenlabs.io/v1/history" }
-
-
-local function GetPlayersToSend()
-      local tbl = {}
-  
-      for _, ply in ipairs( player.GetAll() ) do
-          if ply:GetInfoNum("openai_elevenlabs_download", 0) == 1 then
-              table.insert(tbl, ply)
-          end
-      end
-  
-      return tbl
-end
 
 
 
@@ -140,7 +130,10 @@ function OpenAI.ElevenlabsTTS(ply, msg)
                                           net.WriteString(msg)
                                           net.WriteString(history)
                                           net.WriteString(API)
-                                    net.Broadcast()
+                                    net.Send()
+                              elseif code >= 400 then
+                                    local mError = json["detail"]["message"]
+                                    MsgC(COLOR_WHITE, "[", COLOR_CYAN, "Elevenlabs", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
                               end
                         end,
                         failed      = function() end

@@ -48,6 +48,19 @@ function OpenAI.GetCurrentPath()
     return string.GetFileFromFilename( debug.getinfo(2, "S")["short_src"] )
 end
 
+function OpenAI.GetPlayersToSend(cvar)
+    if not cvar then return end
+
+    local tbl = {}
+    for _, ply in ipairs( player.GetAll() ) do
+        if ply:GetInfoNum(cvar, 0) == 1 then
+            table.insert(tbl, ply)
+        end
+    end
+
+    return tbl
+end
+
 
 function OpenAI.FileRead()
     local cfg = {}
@@ -81,6 +94,7 @@ function OpenAI.FileRead()
 
     return cfg
 end
+OpenAI.ReadConfig = OpenAI.FileRead
 
 
 function OpenAI.GetAPI()
@@ -89,6 +103,7 @@ function OpenAI.GetAPI()
     local header = API == false and {} or { 
         ["Authorization"] = "Bearer " .. API,
     }
+
     return header
 end
 
