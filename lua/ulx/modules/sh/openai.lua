@@ -14,7 +14,7 @@ function ulx.openaiChat(ply, prompt)
 
     OpenAI.ChatFetch(ply, prompt)
 
-    ulx.fancyLog(ply, "#P asked to OpenAI: #s", prompt)
+    --ulx.fancyLog(ply, "#P asked to OpenAI: #s", prompt)
 end
 local openaiChat = ulx.command( OPENAI_ULX, "openai chat", ulx.openaiChat )
 openaiChat:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
@@ -32,7 +32,7 @@ function ulx.openaiImage(ply, prompt)
 
     OpenAI.ImageFetch(ply, prompt)
 
-    ulx.fancyLog(ply, "#P asked to Dalle: #s", prompt)
+    --ulx.fancyLog(ply, "#P asked to Dalle: #s", prompt)
 end
 local openaiImage = ulx.command( OPENAI_ULX, "openai image", ulx.openaiImage )
 openaiImage:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
@@ -50,7 +50,7 @@ function ulx.openaiTranslate(ply, prompt)
 
     OpenAI.TranslateFetch(ply, prompt)
 
-    ulx.fancyLog(ply, "#P asked to translate this: #s", prompt)
+    --ulx.fancyLog(ply, "#P asked to translate this: #s", prompt)
 end
 local openaiTranslate = ulx.command( OPENAI_ULX, "openai translate", ulx.openaiTranslate )
 openaiTranslate:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
@@ -62,13 +62,13 @@ openaiTranslate:help("Generate a translation from OpenAI")
       TTS Module Command
 ------------------------]]--
 function ulx.openaiElevenlabs(ply, prompt)
-    if prompt:len() >= 6 then
+    if prompt   :len() >= 6 then
         return
     end
 
     OpenAI.ElevenlabsTTS(ply, prompt)
 
-    ulx.fancyLog(ply, "#P asked to translate this: #s", prompt)
+    --ulx.fancyLog(ply, "#P asked to translate this: #s", prompt)
 end
 local openaiTranslate = ulx.command( OPENAI_ULX, "openai elevenlabs", ulx.openaiTranslate )
 openaiTranslate:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
