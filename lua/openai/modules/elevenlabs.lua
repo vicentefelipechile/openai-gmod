@@ -104,6 +104,9 @@ OpenAI.REQUESTS["elevenlabs.history"] = { "GET", "https://api.elevenlabs.io/v1/h
 function OpenAI.ElevenlabsTTS(ply, msg)
       if not enabled:GetBool() then return end
 
+      local canUse = hook.Run("OpenAI.ElevenlabsPlyCanUse", ply)
+      if canUse == false then return end
+
       local voice = ply:GetInfo("openai_elevenlabs_voice")
 
       local API = OpenAI.GetConfig("elevenlabs")
@@ -159,7 +162,7 @@ end
       Commands Scripts
 ------------------------]]--
 
-hook.Add("OpenAI.chatPlyCanUse", "OpenAI.chatPlyCanUse", function(ply)
+hook.Add("OpenAI.ElevenlabsPlyCanUse", "OpenAI.ElevenlabsPlyCanUse", function(ply)
     
     local admin = GetConVar("openai_admin"):GetInt()
     local canUse = false
