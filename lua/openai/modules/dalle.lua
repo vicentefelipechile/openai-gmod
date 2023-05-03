@@ -143,7 +143,7 @@ hook.Add("OpenAI.imagePlyCanUse", "OpenAI.imagePlyCanUse", function(ply)
         canUse = ply:IsSuperAdmin()
     elseif admin == 4 then
         if ULib then
-            canUse = ULib.ucl.query(ply, "OpenAI.image")
+            canUse = ULib.ucl.query(ply, "openai image")
         end
     end
 

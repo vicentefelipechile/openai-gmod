@@ -114,7 +114,7 @@ hook.Add("OpenAI.chatPlyCanUse", "OpenAI.chatPlyCanUse", function(ply)
         canUse = ply:IsSuperAdmin()
     elseif admin == 4 then
         if ULib then
-            canUse = ULib.ucl.query(ply, "OpenAI.chat")
+            canUse = ULib.ucl.query(ply, "openai chat")
         end
     end
 

@@ -153,3 +153,40 @@ function OpenAI.ElevenlabsTTS(ply, msg)
             failed      = function() end
       })
 end
+
+
+--[[------------------------
+      Commands Scripts
+------------------------]]--
+
+hook.Add("OpenAI.chatPlyCanUse", "OpenAI.chatPlyCanUse", function(ply)
+    
+    local admin = GetConVar("openai_admin"):GetInt()
+    local canUse = false
+
+    if admin == 1 then
+        canUse = true
+    elseif admin == 2 then
+        canUse = ply:IsAdmin()
+    elseif admin == 3 then
+        canUse = ply:IsSuperAdmin()
+    elseif admin == 4 then
+        if ULib then
+            canUse = ULib.ucl.query(ply, "openai elevenlabs")
+        end
+    end
+
+    return canUse
+end)
+
+hook.Add("PlayerSay", "OpenAI.Elevenlabs", function(ply, text)
+
+    local cmd, prompt = OpenAI.HandleCommands(text)
+
+    if cmd == nil or cmd ~= "tts" then return end
+    if prompt == nil or #prompt < 1 or #prompt then return end
+
+    OpenAI.ElevenlabsTTS(ply, prompt)
+
+    return noshow:GetBool() and "" or text
+end)
