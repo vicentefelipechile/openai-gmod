@@ -2,6 +2,8 @@
                                 HTTP Message Errors
 ----------------------------------------------------------------------------]]--
 
+local REALM = SERVER and "SV " or CLIENT and "CL " or "MN "
+
 local function pMsg(msg)
     MsgC(COLOR_SERVER, " : ", msg, "\n")
 end
@@ -11,14 +13,14 @@ local function eMsg(msg)
 end
 
 local function pError(p, msg)
-    MsgC( COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] " )
-    MsgC( SERVER and COLOR_SERVER or COLOR_CLIENT, SERVER and "SV " or "CL " )
+    MsgC( COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", "#", debug.getinfo(4, "Sl")["currentline"], " - " )
+    MsgC( COLOR_STATE, REALM )
     MsgC( COLOR_WHITE, p, "\n > ", COLOR_RED, msg)
 end
 
 local function pOk(p, msg)
-    MsgC( COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] " )
-    MsgC( SERVER and COLOR_SERVER or COLOR_CLIENT, SERVER and "SV " or "CL " )
+    MsgC( COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", "#", debug.getinfo(4, "Sl")["currentline"], " - " )
+    MsgC( COLOR_STATE, REALM )
     MsgC( COLOR_WHITE, p, "\n > ", COLOR_GREEN, msg )
 end
 

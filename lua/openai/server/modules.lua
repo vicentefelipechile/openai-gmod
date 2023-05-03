@@ -107,6 +107,7 @@ openai.__index = openai
 
 
 function OpenAI.Request()
-    return setmetatable( { [ 0 ] = 0 }, openai)
+    local fallback = table.Copy(openai)
+    return setmetatable( { [ 0 ] = 0 }, fallback)
 end
 

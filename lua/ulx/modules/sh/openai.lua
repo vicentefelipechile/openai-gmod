@@ -37,4 +37,22 @@ end
 local openaiImage = ulx.command( OPENAI_ULX, "openai image", ulx.openaiImage )
 openaiImage:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
 openaiImage:defaultAccess( ULib.ACCESS_ALL )
-openaiChat:help("Generate a image from OpenAI")
+openaiImage:help("Generate a image from OpenAI")
+
+
+--[[------------------------
+      Translate Command
+------------------------]]--
+function ulx.openaiTranslate(ply, prompt)
+    if message:len() >= 6 then
+        return
+    end
+
+    OpenAI.ImageFetch(ply, prompt)
+
+    ulx.fancyLog(ply, "#P asked to translate this: #s", prompt)
+end
+local openaiTranslate = ulx.command( OPENAI_ULX, "openai translate", ulx.openaiTranslate )
+openaiTranslate:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
+openaiTranslate:defaultAccess( ULib.ACCESS_ALL )
+openaiTranslate:help("Generate a translation from OpenAI")

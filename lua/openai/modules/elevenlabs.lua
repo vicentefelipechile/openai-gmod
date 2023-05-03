@@ -3,12 +3,11 @@
 ----------------------------------------------------------------------------]]--
 
 local enabled = CreateConVar("openai_elevenlabs_enabled", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Toggle the elevenlabs module", 0, 1)
-local voice = CreateConVar("openai_elevenlabs_voice", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "What voice response the elevenlabs module")
+local enabled = CreateConVar("openai_elevenlabs_enabled", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Volume of the voice from elevenlabs module", 0, 5)
 
 if not file.Exists("openai/elevenlabs", "DATA") then
       file.CreateDir("openai/elevenlabs")
 end
-
 
 
 --[[------------------------
@@ -18,7 +17,8 @@ end
 if SERVER then
       util.AddNetworkString("OpenAI.elevenlabsToCL")
 else
-      download = CreateConVar("openai_elevenlabs_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Set on to download al sound files from elevenlabs module", 0, 1)
+      CreateClientConVar("openai_elevenlabs_voice", "josh", true, true, "What voice response the elevenlabs module?")
+      local download = CreateConVar("openai_elevenlabs_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Set on to download al sound files from elevenlabs module", 0, 1)
 
       net.Receive("OpenAI.elevenlabsToCL", function()
             if not download:GetBool() then return end
@@ -49,8 +49,17 @@ else
                                     if IsValid(station) then
                                           local who = IsValid(ply) and ply or LocalPlayer()
                                           station:SetPos( who:GetPos() )
-                                          station:SetVolume(4)
+                                          station:SetVolume(1)
                                           station:Play()
+
+                                          local id = os.time() .. "_voice"
+                                          hook.Add("Think", id, function()
+                                                if station:GetState() == GMOD_CHANNEL_STOPPED then
+                                                      hook.Remove("Think", id)
+                                                end
+
+                                                station:SetPos( who:GetPos() )
+                                          end)
                                     end
                               end)
 
@@ -94,6 +103,8 @@ OpenAI.REQUESTS["elevenlabs.history"] = { "GET", "https://api.elevenlabs.io/v1/h
 
 function OpenAI.ElevenlabsTTS(ply, msg)
       if not enabled:GetBool() then return end
+
+      local voice = ply:GetInfo("openai_elevenlabs_voice")
 
       local API = OpenAI.GetConfig("elevenlabs")
       local url = string.format([[https://api.elevenlabs.io/v1/text-to-speech/%s]], voices[ string.lower( voice:GetString() ) ] or voices["josh"] )
