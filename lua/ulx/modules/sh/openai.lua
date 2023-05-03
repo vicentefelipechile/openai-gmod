@@ -8,7 +8,7 @@ OPENAI_ULX = "OpenAI"
         Chat Command
 ------------------------]]--
 function ulx.openaiChat(ply, prompt)
-    if message:len() >= 6 then
+    if prompt:len() >= 6 then
         return
     end
 
@@ -26,7 +26,7 @@ openaiChat:help("Generate a prompt from OpenAI")
         Images Command
 ------------------------]]--
 function ulx.openaiImage(ply, prompt)
-    if message:len() >= 6 then
+    if prompt:len() >= 6 then
         return
     end
 
@@ -44,7 +44,7 @@ openaiImage:help("Generate a image from OpenAI")
       Translate Command
 ------------------------]]--
 function ulx.openaiTranslate(ply, prompt)
-    if message:len() >= 6 then
+    if prompt:len() >= 6 then
         return
     end
 
@@ -62,7 +62,7 @@ openaiTranslate:help("Generate a translation from OpenAI")
       TTS Module Command
 ------------------------]]--
 function ulx.openaiElevenlabs(ply, prompt)
-    if message:len() >= 6 then
+    if prompt:len() >= 6 then
         return
     end
 
