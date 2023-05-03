@@ -110,7 +110,7 @@ function OpenAI.ElevenlabsTTS(ply, msg)
       local voice = ply:GetInfo("openai_elevenlabs_voice")
 
       local API = OpenAI.GetConfig("elevenlabs")
-      local url = string.format([[https://api.elevenlabs.io/v1/text-to-speech/%s]], voices[ string.lower( voice:GetString() ) ] or voices["josh"] )
+      local url = string.format([[https://api.elevenlabs.io/v1/text-to-speech/%s]], voices[ string.lower( voice ) ] or voices["josh"] )
 
       local headers = {
             ["Accept"] = "audio/mpeg",
@@ -144,7 +144,7 @@ function OpenAI.ElevenlabsTTS(ply, msg)
                                           net.WriteString(msg)
                                           net.WriteString(history)
                                           net.WriteString(API)
-                                    net.Send()
+                                    net.Broadcast()
                               elseif code >= 400 then
                                     local mError = json["detail"]["message"]
                                     MsgC(COLOR_WHITE, "[", COLOR_CYAN, "Elevenlabs", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
