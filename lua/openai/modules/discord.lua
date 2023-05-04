@@ -3,7 +3,7 @@
 ----------------------------------------------------------------------------]]--
 
 local defaultinfo = CreateConVar("openai_discord_usedefaultwebhookinfo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Use the default info from Discord instead of replace it", 0, 1)
-local usediscord = CreateConVar("openai_discord_enable", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE, FCVAR_PROTECTED}, "Enable the discord webhook", 0, 1)
+local enabled = CreateConVar("openai_discord_enable", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE, FCVAR_PROTECTED}, "Enable the discord webhook", 0, 1)
 
 if CLIENT then return end
 
@@ -76,7 +76,7 @@ hook.Add("OpenAI.chatFetch", "OpenAI.discord_chat", function(ply, prompt, respon
         body["avatar_url"] = cfg["discord_avatar"]
     end
 
-    if usediscord:GetBool() then
+    if enabled:GetBool() then
         OpenAI.DiscordSendMessage(body)
     end
 end)
@@ -107,7 +107,7 @@ hook.Add("OpenAI.imageFetch", "OpenAI.discord_image", function(ply, prompt, resp
         body["avatar_url"] = cfg["discord_avatar"]
     end
 
-    if usediscord:GetBool() then
+    if enabled:GetBool() then
         OpenAI.DiscordSendMessage(body)
     end
 end)

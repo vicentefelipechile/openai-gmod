@@ -3,7 +3,8 @@
 ----------------------------------------------------------------------------]]--
 
 local enabled = CreateConVar("openai_elevenlabs_enabled", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Toggle the elevenlabs module", 0, 1)
-local enabled = CreateConVar("openai_elevenlabs_enabled", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Volume of the voice from elevenlabs module", 0, 5)
+local volume = CreateConVar("openai_elevenlabs_volume", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Volume of the voice from elevenlabs module", 0, 5)
+local noshow = CreateConVar("openai_elevenlabs_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 if not file.Exists("openai/elevenlabs", "DATA") then
       file.CreateDir("openai/elevenlabs")
@@ -50,7 +51,7 @@ else
                                     if IsValid(station) then
                                           local who = IsValid(ply) and ply or LocalPlayer()
                                           station:SetPos( who:GetPos() )
-                                          station:SetVolume(1)
+                                          station:SetVolume( volume:GetInt() or 1 )
                                           station:Play()
 
                                           g_station = station

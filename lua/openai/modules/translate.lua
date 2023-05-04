@@ -2,7 +2,7 @@
                                 translate Module
 ----------------------------------------------------------------------------]]--
 
-CreateConVar("openai_translate_enabled", 0, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Enable the translation module", 0, 1)
+local enabled = CreateConVar("openai_translate_enabled", 0, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Enable the translation module", 0, 1)
 
 if SERVER then
     util.AddNetworkString("openai.translateSVtoCL")
@@ -35,6 +35,8 @@ end
 ------------------------]]--
 
 function OpenAI.TranslateFetch(ply, msg)
+    if not enabled:GetBool() then return end
+
     local cfg = OpenAI.FileRead()
 
     local canUse = hook.Run("OpenAI.translatePlyCanUse", ply)
