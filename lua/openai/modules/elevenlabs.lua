@@ -44,7 +44,8 @@ else
                         if code == 200 then
                               local path = OpenAI.SetFileName("voice", ".mp3", "elevenlabs")
                               file.Write( path, body )
-
+                        
+                              local g_station = nil
                               sound.PlayFile("data/" .. path, "3d noplay", function(station, errCode, errStr)
                                     if IsValid(station) then
                                           local who = IsValid(ply) and ply or LocalPlayer()
@@ -52,13 +53,14 @@ else
                                           station:SetVolume(1)
                                           station:Play()
 
+                                          g_station = station
                                           local id = os.time() .. "_voice"
                                           hook.Add("Think", id, function()
-                                                if station:GetState() == GMOD_CHANNEL_STOPPED then
+                                                if g_station:GetState() == GMOD_CHANNEL_STOPPED then
                                                       hook.Remove("Think", id)
                                                 end
 
-                                                station:SetPos( who:GetPos() )
+                                                g_station:SetPos( who:GetPos() )
                                           end)
                                     end
                               end)
