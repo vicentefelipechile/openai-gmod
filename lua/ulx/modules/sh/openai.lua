@@ -56,21 +56,3 @@ local openaiTranslate = ulx.command( OPENAI_ULX, "openai translate", ulx.openaiT
 openaiTranslate:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
 openaiTranslate:defaultAccess( ULib.ACCESS_ALL )
 openaiTranslate:help("Generate a translation from OpenAI")
-
-
---[[------------------------
-      TTS Module Command
-------------------------]]--
-function ulx.openaiElevenlabs(ply, prompt)
-    if prompt   :len() >= 6 then
-        return
-    end
-
-    OpenAI.ElevenlabsTTS(ply, prompt)
-
-    --ulx.fancyLog(ply, "#P asked to translate this: #s", prompt)
-end
-local openaiTranslate = ulx.command( OPENAI_ULX, "openai elevenlabs", ulx.openaiTranslate )
-openaiTranslate:addParam{ type=ULib.cmds.StringArg, hint="Ask anything" }
-openaiTranslate:defaultAccess( ULib.ACCESS_ALL )
-openaiTranslate:help("Generate a translation from OpenAI")

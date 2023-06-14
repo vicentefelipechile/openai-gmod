@@ -2,7 +2,9 @@
                                 Dalle Module
 ----------------------------------------------------------------------------]]--
 
-local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
+OpenAI.Config.Dalle = {}
+OpenAI.Config.Dalle.NoShow = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
+OpenAI.Config.Dalle.Size = CreateConVar("openai_image_size", "256x256", {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "What will be the size of the image")
 
 
 if SERVER then
@@ -65,7 +67,7 @@ function OpenAI.ImageFetch(ply, msg)
     local openai = OpenAI.Request()
     :SetType("images")
     :AddBody("prompt", msg)
-    :AddBody("size", OpenAI.GetConfig("image_size"))
+    :AddBody("size", OpenAI.Config.Dalle.Size:GetString())
     :AddBody("user", ply)
     :SetSuccess(function(code, body)
         OpenAI.HandleCode(code)
