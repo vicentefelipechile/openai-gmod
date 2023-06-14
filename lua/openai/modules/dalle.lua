@@ -4,32 +4,11 @@
 
 local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
+
 if SERVER then
     util.AddNetworkString("openai.imageSVtoCL")
-end
-
-if CLIENT then
-    CreateConVar("openai_image_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Deberias descargar las imagenes del servidor?", 0, 1)
-    CreateClientConVar("openai_image_namelength", 32, true, true, "El nombre maximo que puede tener el archivo", 8, 64)
-
-    function OpenAI.ImageSetFileName(prompt)
-        local maxLength = GetConVar("openai_image_namelength"):GetInt()
-        local unixtime = os.time()
-        local name = prompt:gsub("[%p%c]", ""):gsub("%s+", "_")
-        
-        if name:len() > maxLength then
-            name = name:sub(1, maxLength)
-        end
-        
-        return string.format("%d_%s.png", unixtime, name)
-    end
-    OpenAI.imageSetFileName = OpenAI.ImageSetFileName
-
-
-    if not file.Exists("openai/image", "DATA") then
-        file.CreateDir("openai/image")
-    end
-
+else
+    CreateClientConVar("openai_image_download", 1, true, true, "Download images?", 0, 1)
 
     net.Receive("openai.imageSVtoCL", function()
         local ply = net.ReadEntity()
@@ -44,15 +23,15 @@ if CLIENT then
                 OpenAI.HandleCode(code)
 
                 if code == 200 then
-                    local path = "openai/image/" .. OpenAI.ImageSetFileName(prompt)
+                    local path = "openai/image/" .. OpenAI.SetFileName(prompt)
                     file.Write(path, image)
 
-                    hook.Call("OpenAI.onImageDownloaded", nil, ply, path, prompt)
+                    hook.Call("OpenAI.OnImageDownloaded", nil, ply, path, prompt)
                 end
             end
         })
 
-        hook.Call("OpenAI.onImageReceive", nil, ply, url, prompt)
+        hook.Call("OpenAI.OnImageReceive", nil, ply, url, prompt)
     end)
 
     return
@@ -61,9 +40,6 @@ end
 --[[------------------------
       Local Definitions
 ------------------------]]--
-
-local c_error = COLOR_RED
-local c_normal = COLOR_SERVER
 
 local function getPlayersToSend()
     local tbl = {}
@@ -87,12 +63,11 @@ function OpenAI.ImageFetch(ply, msg)
     if canUse == false then return end
 
     local openai = OpenAI.Request()
-    openai:SetType("images")
-    openai:AddBody("prompt", msg)
-    openai:AddBody("size", OpenAI.GetConfig("image_size"))
-    openai:AddBody("user", ply)
-
-    openai:SetSuccess(function(code, body)
+    :SetType("images")
+    :AddBody("prompt", msg)
+    :AddBody("size", OpenAI.GetConfig("image_size"))
+    :AddBody("user", ply)
+    :SetSuccess(function(code, body)
         OpenAI.HandleCode(code)
 
         local json = util.JSONToTable(body)
@@ -106,14 +81,14 @@ function OpenAI.ImageFetch(ply, msg)
                 net.WriteString(msg)
             net.Send( getPlayersToSend() )
 
-            hook.Call("OpenAI.imageFetch", nil, ply, msg, response)
+            hook.Call("OpenAI.OnImageReceive", nil, ply, msg, response)
+
         elseif code == 400 then
+
             mError = json["error"]["message"]
             MsgC(COLOR_WHITE, " > ", COLOR_RED, mError, "\n")
 
-            PrintTable(openai:GetAll())
-
-            if GetConVar("openai_displayerrorcl"):GetBool() then
+            if OpenAI.Config.DisplayErrorCL:GetBool() then
                 net.Start("OpenAI.errorToCL")
                     net.WriteString(json["error"]["message"])
                 net.Send(ply)
@@ -123,7 +98,6 @@ function OpenAI.ImageFetch(ply, msg)
 
     openai:SendRequest()
 end
-OpenAI.imageFetch = OpenAI.ImageFetch
 
 
 --[[------------------------

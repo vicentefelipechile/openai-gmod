@@ -2,8 +2,8 @@
                                 Shared OpenAI
 ----------------------------------------------------------------------------]]--
 
-CreateConVar("openai_admin", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "What type of admin we should to use? (1: All-Users, 2: Only Admin, 3: Only SuperAdmin, 4: ULX)")
-CreateConVar("openai_displayerrorcl", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Display error to client?", 0, 1)
+OpenAI.Config.Admin = CreateConVar("openai_admin", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "What type of admin we should to use? (1: All-Users, 2: Only Admin, 3: Only SuperAdmin, 4: ULX)")
+OpenAI.Config.DisplayErrorCL = CreateConVar("openai_displayerrorcl", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Display error to client?", 0, 1)
 
 
 --[[----------------------------
@@ -54,4 +54,3 @@ function OpenAI.HandleCommands(str)
 
     return command, value
 end
-OpenAI.handleCommands = OpenAI.HandleCommands

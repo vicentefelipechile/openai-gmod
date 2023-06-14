@@ -23,7 +23,7 @@ local openai = {
 
     SetType = function(self, type)
         if not REQUESTS[type] then
-            error( "bad argument #1 to 'openai:SetType' (you '" .. tostring(type) .. "' has not been found in the OpenAI.REQUEST table)" )
+            error( "bad argument #1 to 'openai:SetType' (your '" .. tostring(type) .. "' has not been found in the OpenAI.REQUEST table)" )
         end
 
         local method, url = REQUESTS[type][1], REQUESTS[type][2]
@@ -87,7 +87,7 @@ local openai = {
     SendRequest = function(self)
         local req = table.Copy( self.request )
         if req["body"]["user"] then
-            req["body"]["user"] = OpenAI.ReplaceSteamID(OpenAI.GetConfig("user"), req["body"]["user"])
+            req["body"]["user"] = OpenAI.ReplaceSteamID(OpenAI.Config.PlayerFormat:GetString(), req["body"]["user"])
         end
 
         local body = util.TableToJSON(req["body"])

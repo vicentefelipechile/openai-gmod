@@ -3,14 +3,11 @@
 ----------------------------------------------------------------------------]]--
 
 util.AddNetworkString("OpenAI.errorToCL")
-include("openai/server/default.lua")
+util.AddNetworkString("OpenAI.SVtoCL")
 
 --[[------------------------
-      Local Definitions
+     Request Definitions
 ------------------------]]--
-
-local trim = string.Trim
-local start = string.StartsWith
 
 OpenAI.REQUESTS = {
     -- Main
@@ -32,83 +29,44 @@ OpenAI.REQUESTS = {
     ["retrieve"]    = {"GET", "https://api.openai.com/v1/files/"},                  -- https://platform.openai.com/docs/api-reference/files/retrieve
 }
 
-local c_ok = COLOR_GREEN
-local c_error = COLOR_RED
-local c_normal = COLOR_SERVER
-local c_important = COLOR_MENU
+--[[------------------------
+     Convar Definitions
+------------------------]]--
 
-local folder = "openai"
-
+OpenAI.Config.APIKEY = CreateConVar("openai_apikey", "YOUR_APIKEY_HERE", FCVAR_ARCHIVE, "Set your api key here")
+OpenAI.Config.PlayerFormat = CreateConVar("openai_playerformat", "[steamid]", FCVAR_ARCHIVE)
 
 --[[------------------------
         Util Scripts
 ------------------------]]--
 
-function OpenAI.GetCurrentPath()
-    return string.GetFileFromFilename( debug.getinfo(2, "S")["short_src"] )
+function OpenAI.SendError(ply, msg)
+    net.Start("OpenAI.errorToCL")
+        net.WriteString(msg)
+    net.Send(ply)
 end
 
-function OpenAI.GetPlayersToSend(cvar)
-    if not cvar then return end
+function OpenAI.SendMessage(ply, prompt, response, namehook, prefix)
+    if not IsValid(ply) then ply = NULL end
+    if not ply:IsPlayer() then ply = NULL end
 
-    local tbl = {}
-    for _, ply in ipairs( player.GetAll() ) do
-        if ply:GetInfoNum(cvar, 0) == 1 then
-            table.insert(tbl, ply)
-        end
-    end
-
-    return tbl
+    net.Start("OpenAI.SVtoCL")
+        net.WriteEntity(ply)
+        net.WriteString(prompt)
+        net.WriteString(response)
+        net.WriteString(namehook)
+        net.WriteString(prefix or "OpenAI")
+    net.Broadcast()
 end
-
-
-function OpenAI.FileRead()
-    local cfg = {}
-    local cfg_file = file.Open(folder .. "/openai_config.txt", "r", "DATA")
-
-    if cfg_file == nil then return OpenAI.default end
-
-    while not cfg_file:EndOfFile() do
-        local line = trim( cfg_file:ReadLine() )
-
-        if line == "" or string.sub(line, 1, 1) == "#" then continue end
-
-        local key, value = string.match(line, "(%S+):%s*(.*)")
-        if key == nil or value == nil then continue end
-
-        key, value = string.lower( trim(key) ), trim(value)
-        if tonumber(value) then
-            value = tonumber(value)
-        end
-
-        cfg[key] = cfg[key] or value
-    end
-
-    cfg_file:Close()
-
-    for k, v in pairs( OpenAI.default ) do
-        if cfg[k] == nil then
-            cfg[k] = v
-        end
-    end
-
-    return cfg
-end
-OpenAI.ReadConfig = OpenAI.FileRead
-
 
 function OpenAI.GetAPI()
-    local API = OpenAI.FileRead()["openai"] or false
+    local API = OpenAI.Config.APIKEY:GetString()
 
-    local header = API == false and {} or { 
+    local header = API == "YOUR_APIKEY_HERE" and {} or { 
         ["Authorization"] = "Bearer " .. API,
     }
 
     return header
-end
-
-function OpenAI.GetConfig(str)
-    return OpenAI.FileRead()[str]
 end
 
 -- Generate by AI
@@ -126,7 +84,6 @@ function OpenAI.IntToJson(field, json)
     end
 end
 
-
 function OpenAI.ReplaceSteamID(text, ply)
     if string.find(text, "%[steamid%]") then
         text = string.gsub(text, "%[steamid%]", ply:SteamID())
@@ -138,7 +95,6 @@ function OpenAI.ReplaceSteamID(text, ply)
 
     return text
 end
-OpenAI.replaceSteamID = OpenAI.ReplaceSteamID
 
 
 --[[------------------------

@@ -5,12 +5,6 @@
 local defaultinfo = CreateConVar("openai_discord_usedefaultwebhookinfo", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Use the default info from Discord instead of replace it", 0, 1)
 local enabled = CreateConVar("openai_discord_enable", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE, FCVAR_PROTECTED}, "Enable the discord webhook", 0, 1)
 
-if CLIENT then return end
-
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
-
 --[[------------------------
       Local Definitions
 ------------------------]]--
@@ -43,16 +37,14 @@ function OpenAI.DiscordSendMessage(tbl)
         },
 
         success = function(code, _, headers)
-            local fCode = OpenAI.HTTPcode[code] or function() MsgC(code) end
-            fCode(GetPath())
+            OpenAI.HandleCode(code)
         end,
         failed = function(err)
-            MsgC(err, "\n")
+            MsgC("Error: ", err, "\n")
         end
     })
 
 end
-OpenAI.discordSendMessage = OpenAI.DiscordSendMessage
 
 --[[------------------------
         Chat Fetch
