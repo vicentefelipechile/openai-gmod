@@ -64,12 +64,12 @@ function OpenAI.ImageFetch(ply, msg)
     local canUse = hook.Run("OpenAI.imagePlyCanUse", ply)
     if canUse == false then return end
 
-    local openai = OpenAI.Request()
-    :SetType("images")
-    :AddBody("prompt", msg)
-    :AddBody("size", OpenAI.Config.Dalle.Size:GetString())
-    :AddBody("user", ply)
-    :SetSuccess(function(code, body)
+    local request = OpenAI.Request()
+    request:SetType("images")
+    request:AddBody("prompt", msg)
+    request:AddBody("size", OpenAI.Config.Dalle.Size:GetString())
+    request:AddBody("user", ply)
+    request:SetSuccess(function(code, body)
         OpenAI.HandleCode(code)
 
         local json = util.JSONToTable(body)
@@ -98,7 +98,7 @@ function OpenAI.ImageFetch(ply, msg)
         end
     end)
 
-    openai:SendRequest()
+    request:SendRequest()
 end
 
 
@@ -136,5 +136,5 @@ hook.Add("PlayerSay", "OpenAI.image", function(ply, text)
 
     OpenAI.ImageFetch(ply, prompt)
 
-    return image_show:GetBool() and "" or text
+    return OpenAI.Config.Dalle.NoShow:GetBool() and "" or text
 end)

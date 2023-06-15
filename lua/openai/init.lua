@@ -33,7 +33,7 @@ OpenAI.REQUESTS = {
      Convar Definitions
 ------------------------]]--
 
-OpenAI.Config.APIKEY = CreateConVar("openai_apikey", "YOUR_APIKEY_HERE", FCVAR_ARCHIVE, "Set your api key here")
+OpenAI.Config.APIKEY = CreateConVar("openai_apikey", "YOUR_APIKEY_HERE", {FCVAR_ARCHIVE, FCVAR_DONTRECORD, FCVAR_PROTECTED, FCVAR_UNLOGGED}, "Set your api key here")
 OpenAI.Config.PlayerFormat = CreateConVar("openai_playerformat", "[steamid]", FCVAR_ARCHIVE)
 
 --[[------------------------

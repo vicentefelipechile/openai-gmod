@@ -6,12 +6,13 @@ OpenAI.Config.Translate = {}
 OpenAI.Config.Translate.enabled = CreateConVar("openai_translate_enabled", 0, {FCVAR_REPLICATED, FCVAR_NOTIFY, FCVAR_ARCHIVE}, "Enable the translation module", 0, 1)
 
 OpenAI.Config.Translate.Model = CreateConVar("openai_translate_model", "gpt-3.5-turbo", {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Set the model for the translation module")
+OpenAI.Config.Translate.Prefix = CreateConVar("openai_translate_model", ".", {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Set the prefix of the translation module")
 OpenAI.Config.Translate.Temperature = CreateConVar("openai_translate_temperature", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Set the temperature for the translation module")
 OpenAI.Config.Translate.MaxTokens = CreateConVar("openai_translate_maxtokens", 24, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Set the maximun amount of tokens for the translation module")
 
 if CLIENT then
-    CreateConVar("openai_translate_from", "spanish", {FCVAR_ARCHIVE, FCVAR_USERINFO}, "Request a translate from a language")
-    CreateConVar("openai_translate_to", "english", {FCVAR_ARCHIVE, FCVAR_USERINFO}, "Request a translate to a language")
+    CreateClientConVar("openai_translate_from", "spanish", true, true, "Request a translate from a language")
+    CreateClientConVar("openai_translate_to", "english", true, true, "Request a translate to a language")
     return
 end
 
@@ -31,15 +32,16 @@ function OpenAI.TranslateFetch(ply, msg)
     if hook.Run("OpenAI.translatePlyCanUse", ply) == false then return end
 
     local content = string.format("Translate this %s text into %s text\n\n%s", ply:GetInfo("openai_translate_from"), ply:GetInfo("openai_translate_to"), msg)
-    local openai = OpenAI.Request():SetType("chat")
-    :AddBody("model", OpenAI.Config.Translate.Model:GetString())
-    :AddBody("messages", {
-      { role = "user", content = content}  
+    local request = OpenAI.Request()
+    request:SetType("chat")
+    request:AddBody("model", OpenAI.Config.Translate.Model:GetString())
+    request:AddBody("messages", {
+      { role = "user", content = content}
     })
-    :AddBody("temperature", OpenAI.Config.Translate.Temperature:GetFloat())
-    :AddBody("max_tokens", OpenAI.Config.Translate.MaxTokens:GetFloat())
-    :AddBody("user", ply)
-    :SetSuccess(function(code, body)
+    request:AddBody("temperature", OpenAI.Config.Translate.Temperature:GetFloat())
+    request:AddBody("max_tokens", OpenAI.Config.Translate.MaxTokens:GetFloat())
+    request:AddBody("user", ply)
+    request:SetSuccess(function(code, body)
         OpenAI.HandleCode(code)
 
         local json = util.JSONToTable( string.Trim( body ) )
@@ -64,7 +66,7 @@ function OpenAI.TranslateFetch(ply, msg)
         end
     end)
 
-    openai:SendRequest()
+    request:SendRequest()
 end
 
 
@@ -96,7 +98,7 @@ hook.Add("PlayerSay", "OpenAI.translate", function(ply, text)
 
     local prefix, prompt = text:sub(1,1), text:sub(1)
 
-    if prefix == OpenAI.GetConfig("translator_cmd") then
+    if prefix == OpenAI.Config.Translate.Prefix:GetString() then
         if prompt == nil or #prompt < 1 then return end
         OpenAI.TranslateFetch(ply, prompt)
 

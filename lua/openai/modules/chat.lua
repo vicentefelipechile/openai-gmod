@@ -17,7 +17,7 @@ if CLIENT then return end
 ------------------------]]--
 
 local namehook = "OpenAI.OnChatReceive"
-local ChatHistory = {}
+OpenAI.ChatHistory = OpenAI.ChatHistory or {}
 
 --[[------------------------
         Main Scripts
@@ -29,35 +29,35 @@ function OpenAI.ChatFetch(ply, msg)
     if canUse == false then return end
 
     if OpenAI.Config.Chat.AlwaysReset:GetBool() then
-        ChatHistory[ply:SteamID()] = nil
+        OpenAI.ChatHistory[ply:SteamID()] = nil
     end
 
-    if not ChatHistory[ply:SteamID()] then
+    if not OpenAI.ChatHistory[ply:SteamID()] then
         --[[
         Some cringe message
-        ChatHistory[ply:SteamID()] = {
+        OpenAI.ChatHistory[ply:SteamID()] = {
             { role = "user", content = "You are a cute anime girl" },
-            { role = "assistant", content = "OwO" },
-            { role = "user", content = msg }
+            { role = "assistant", content = "OwO" }
         }
 
-        ChatHistory[ply:SteamID()][0] = {
+        OpenAI.ChatHistory[ply:SteamID()][0] = {
             { role = "system", content = "You are a cute anime girl" }
         }
         --]]
 
-        ChatHistory[ply:SteamID()] = {
-            { role = "user", content = msg }
-        }
+        OpenAI.ChatHistory[ply:SteamID()] = {}
     end
 
-    local request = OpenAI.Request():SetType("chat")
-    :AddBody("model", OpenAI.Config.Chat.Model:GetString())
-    :AddBody("messages", ChatHistory[ply:SteamID()])
-    :AddBody("temperature", OpenAI.Config.Chat.Temperature:GetFloat())
-    :AddBody("max_tokens", OpenAI.Config.Chat.MaxTokens:GetInt())
-    :AddBody("user", ply)
-    :SetSuccess(function(code, body)
+    table.insert(OpenAI.ChatHistory[ply:SteamID()], { role = "user", content = msg })
+
+    local request = OpenAI.Request()
+    request:SetType("chat")
+    request:AddBody("model", OpenAI.Config.Chat.Model:GetString())
+    request:AddBody("messages", OpenAI.ChatHistory[ply:SteamID()])
+    request:AddBody("temperature", OpenAI.Config.Chat.Temperature:GetFloat())
+    request:AddBody("max_tokens", OpenAI.Config.Chat.MaxTokens:GetInt())
+    request:AddBody("user", ply)
+    request:SetSuccess(function(code, body)
         OpenAI.HandleCode(code)
 
         local json = util.JSONToTable( string.Trim( body ) )
@@ -65,7 +65,7 @@ function OpenAI.ChatFetch(ply, msg)
         if code == 200 then
 
             local response = json["choices"][1]["message"]["content"]
-            table.insert( ChatHistory[ply:SteamID()], { role = "assistant", content = response } )
+            table.insert( OpenAI.ChatHistory[ply:SteamID()], { role = "assistant", content = response } )
 
             OpenAI.SendMessage(ply, msg, response, namehook, "Chat")
             hook.Call(namehook, nil, ply, msg, response)
@@ -119,5 +119,5 @@ hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
     OpenAI.ChatFetch(ply, prompt)
 
-    return noshow:GetBool() and "" or text
+    return OpenAI.Config.Chat.NoShow:GetBool() and "" or text
 end)
