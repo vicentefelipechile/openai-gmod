@@ -112,6 +112,11 @@ end)
 
 hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
+    if string.lower( text ) == "!chat reset" then
+        OpenAI.ChatHistory[ply:SteamID()] = nil
+        return OpenAI.Config.Chat.NoShow:GetBool() and "" or text
+    end
+
     local cmd, prompt = OpenAI.HandleCommands(text)
 
     if cmd == nil or cmd ~= "chat" then return end
