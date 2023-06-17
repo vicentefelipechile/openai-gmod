@@ -2,100 +2,88 @@
                                 Chat Module
 ----------------------------------------------------------------------------]]--
 
-local noshow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
-local alwaysreset = CreateConVar("openai_chat_alwaysreset", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Always reset the chat?")
+OpenAI.Config.Chat = {}
+OpenAI.Config.Chat.NoShow = CreateConVar("openai_chat_noshow", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
+OpenAI.Config.Chat.AlwaysReset = CreateConVar("openai_chat_alwaysreset", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Always reset the chat?")
 
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
+OpenAI.Config.Chat.Model = CreateConVar("openai_chat_model", "gpt-3.5-turbo", {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Set the model for the Chat module")
+OpenAI.Config.Chat.Temperature = CreateConVar("openai_chat_temperature", 1, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Set the temperature for the Chat module")
+OpenAI.Config.Chat.MaxTokens = CreateConVar("openai_chat_maxtokens", 24, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Set the maximun amount of tokens for the Chat module")
 
-if SERVER then
-    util.AddNetworkString("openai.chatSVtoCL")
-end
-
-if CLIENT then
-    net.Receive("openai.chatSVtoCL", function()
-        local ply = net.ReadEntity()
-        local prompt = net.ReadString()
-        local response = net.ReadString()
-
-        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, IsValid(ply) and ply:Nick() or "Disconnected", ": ", COLOR_CLIENT, prompt)
-        OpenAI.chatPrint("[Chat] ", COLOR_WHITE, "OpenAI: ", response)
-
-        hook.Call("OpenAI.onChatReceive", nil, ply, prompt, response)
-    end)
-
-    return
-end
+if CLIENT then return end
 
 --[[------------------------
       Local Definitions
 ------------------------]]--
 
-local c_error = COLOR_RED
-local c_normal = COLOR_SERVER
-
-do
-    if not file.Exists("openai/chat", "DATA") then
-        file.CreateDir("openai/chat")
-    end
-end
-
+local namehook = "OpenAI.OnChatReceive"
+OpenAI.ChatHistory = OpenAI.ChatHistory or {}
 
 --[[------------------------
         Main Scripts
 ------------------------]]--
 
-function OpenAI.chatFetch(ply, msg)
+function OpenAI.ChatFetch(ply, msg)
 
     local canUse = hook.Run("OpenAI.chatPlyCanUse", ply)
     if canUse == false then return end
 
-    local cfg = OpenAI.FileRead()
+    if OpenAI.Config.Chat.AlwaysReset:GetBool() then
+        OpenAI.ChatHistory[ply:SteamID()] = nil
+    end
 
-    local body = {
-        model       = cfg["chat_model"],
-        messages    = {
-            { role = "user", content = msg }
-        },
-        temperature = cfg["chat_temperature"],
-        max_tokens  = cfg["chat_max_tokens"],
-        user        = OpenAI.replaceSteamID( cfg["chat_user"], ply ),
-    }
+    if not OpenAI.ChatHistory[ply:SteamID()] then
+        --[[
+        Some cringe message
+        OpenAI.ChatHistory[ply:SteamID()] = {
+            { role = "user", content = "You are a cute anime girl" },
+            { role = "assistant", content = "OwO" }
+        }
 
-    local openai = OpenAI.Request()
-    openai:SetType("chat")
-    openai:SetBody(body)
-    openai:SetSuccess(function(code, body)
-        OpenAI.HandleCode(code, GetPath())
+        OpenAI.ChatHistory[ply:SteamID()][0] = {
+            { role = "system", content = "You are a cute anime girl" }
+        }
+        --]]
+
+        OpenAI.ChatHistory[ply:SteamID()] = {}
+    end
+
+    table.insert(OpenAI.ChatHistory[ply:SteamID()], { role = "user", content = msg })
+
+    local request = OpenAI.Request()
+    request:SetType("chat")
+    request:AddBody("model", OpenAI.Config.Chat.Model:GetString())
+    request:AddBody("messages", OpenAI.ChatHistory[ply:SteamID()])
+    request:AddBody("temperature", OpenAI.Config.Chat.Temperature:GetFloat())
+    request:AddBody("max_tokens", OpenAI.Config.Chat.MaxTokens:GetInt())
+    request:AddBody("user", ply)
+    request:SetSuccess(function(code, body)
+        OpenAI.HandleCode(code)
 
         local json = util.JSONToTable( string.Trim( body ) )
 
         if code == 200 then
+
             local response = json["choices"][1]["message"]["content"]
+            table.insert( OpenAI.ChatHistory[ply:SteamID()], { role = "assistant", content = response } )
 
-            net.Start("openai.chatSVtoCL")
-                net.WriteEntity(ply)
-                net.WriteString(msg)
-                net.WriteString(response)
-            net.Broadcast()
+            OpenAI.SendMessage(ply, msg, response, namehook, "Chat")
+            hook.Call(namehook, nil, ply, msg, response)
 
-            hook.Call("OpenAI.chatFetch", nil, ply, msg, response)
         elseif code >= 400 then
+
             mError = json["error"]["message"]
             MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
 
             if GetConVar("openai_displayerrorcl"):GetBool() then
-                net.Start("OpenAI.errorToCL")
-                    net.WriteString(json["error"]["message"])
-                net.Send(ply)
+                OpenAI.SendError(ply, mError)
             end
+
         end
     end)
 
-    openai:SendRequest()
+    request:SendRequest()
 end
-
 
 
 --[[------------------------
@@ -115,7 +103,7 @@ hook.Add("OpenAI.chatPlyCanUse", "OpenAI.chatPlyCanUse", function(ply)
         canUse = ply:IsSuperAdmin()
     elseif admin == 4 then
         if ULib then
-            canUse = ULib.ucl.query(ply, "OpenAI.chat")
+            canUse = ULib.ucl.query(ply, "openai chat")
         end
     end
 
@@ -124,12 +112,17 @@ end)
 
 hook.Add("PlayerSay", "OpenAI.chat", function(ply, text)
 
-    local cmd, prompt = OpenAI.handleCommands(text)
+    if string.lower( text ) == "!chat reset" then
+        OpenAI.ChatHistory[ply:SteamID()] = nil
+        return OpenAI.Config.Chat.NoShow:GetBool() and "" or text
+    end
+
+    local cmd, prompt = OpenAI.HandleCommands(text)
 
     if cmd == nil or cmd ~= "chat" then return end
     if prompt == nil or #prompt < 1 then return end
 
-    OpenAI.chatFetch(ply, prompt)
+    OpenAI.ChatFetch(ply, prompt)
 
-    return noshow:GetBool() and "" or text
+    return OpenAI.Config.Chat.NoShow:GetBool() and "" or text
 end)

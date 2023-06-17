@@ -2,37 +2,15 @@
                                 Dalle Module
 ----------------------------------------------------------------------------]]--
 
-local function GetPath()
-    return string.GetFileFromFilename( debug.getinfo(1, "S")["short_src"] )
-end
+OpenAI.Config.Dalle = {}
+OpenAI.Config.Dalle.NoShow = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
+OpenAI.Config.Dalle.Size = CreateConVar("openai_image_size", "256x256", {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "What will be the size of the image")
 
-local image_show = CreateConVar("openai_image_noshow", 0, {FCVAR_NOTIFY, FCVAR_REPLICATED, FCVAR_ARCHIVE}, "Should show the command in the chat?", 0, 1)
 
 if SERVER then
     util.AddNetworkString("openai.imageSVtoCL")
-end
-
-if CLIENT then
-    CreateConVar("openai_image_download", 1, {FCVAR_USERINFO, FCVAR_ARCHIVE}, "Deberias descargar las imagenes del servidor?", 0, 1)
-    CreateClientConVar("openai_image_namelength", 32, true, true, "El nombre maximo que puede tener el archivo", 8, 64)
-
-    function OpenAI.imageSetFileName(prompt)
-        local maxLength = GetConVar("openai_image_namelength"):GetInt()
-        local unixtime = os.time()
-        local name = prompt:gsub("[%p%c]", ""):gsub("%s+", "_")
-        
-        if name:len() > maxLength then
-            name = name:sub(1, maxLength)
-        end
-        
-        return string.format("%d_%s.png", unixtime, name)
-    end
-
-
-    if not file.Exists("openai/image", "DATA") then
-        file.CreateDir("openai/image")
-    end
-
+else
+    CreateClientConVar("openai_image_download", 1, true, true, "Download images?", 0, 1)
 
     net.Receive("openai.imageSVtoCL", function()
         local ply = net.ReadEntity()
@@ -44,18 +22,18 @@ if CLIENT then
             url = url,
             
             success = function(code, image)
-                OpenAI.HandleCode(code, GetPath())
+                OpenAI.HandleCode(code)
 
                 if code == 200 then
-                    local path = "openai/image/" .. OpenAI.imageSetFileName(prompt)
+                    local path = "openai/image/" .. OpenAI.SetFileName(prompt)
                     file.Write(path, image)
 
-                    hook.Call("OpenAI.onImageDownloaded", nil, ply, path, prompt)
+                    hook.Call("OpenAI.OnImageDownloaded", nil, ply, path, prompt)
                 end
             end
         })
 
-        hook.Call("OpenAI.onImageReceive", nil, ply, url, prompt)
+        hook.Call("OpenAI.OnImageReceive", nil, ply, url, prompt)
     end)
 
     return
@@ -64,9 +42,6 @@ end
 --[[------------------------
       Local Definitions
 ------------------------]]--
-
-local c_error = COLOR_RED
-local c_normal = COLOR_SERVER
 
 local function getPlayersToSend()
     local tbl = {}
@@ -84,24 +59,18 @@ end
         Main Scripts
 ------------------------]]--
 
-function OpenAI.imageFetch(ply, msg)
+function OpenAI.ImageFetch(ply, msg)
 
     local canUse = hook.Run("OpenAI.imagePlyCanUse", ply)
     if canUse == false then return end
 
-    local cfg = OpenAI.FileRead()
-
-    local body = {
-        prompt  = msg,
-        size    = cfg["image_size"],
-        user    = OpenAI.replaceSteamID( cfg["image_user"], ply ),
-    }
-
-    local openai = OpenAI.Request()
-    openai:SetType("images")
-    openai:SetBody(body)
-    openai:SetSuccess(function(code, body)
-        OpenAI.HandleCode(code, GetPath())
+    local request = OpenAI.Request()
+    request:SetType("images")
+    request:AddBody("prompt", msg)
+    request:AddBody("size", OpenAI.Config.Dalle.Size:GetString())
+    request:AddBody("user", ply)
+    request:SetSuccess(function(code, body)
+        OpenAI.HandleCode(code)
 
         local json = util.JSONToTable(body)
 
@@ -114,12 +83,14 @@ function OpenAI.imageFetch(ply, msg)
                 net.WriteString(msg)
             net.Send( getPlayersToSend() )
 
-            hook.Call("OpenAI.imageFetch", nil, ply, msg, response)
-        elseif code == 400 then
-            mError = json["error"]["message"]
-            MsgC(COLOR_WHITE, "[", COLOR_CYAN, "OpenAI", COLOR_WHITE, "] ", COLOR_RED, mError, "\n")
+            hook.Call("OpenAI.OnImageReceive", nil, ply, msg, response)
 
-            if GetConVar("openai_displayerrorcl"):GetBool() then
+        elseif code == 400 then
+
+            mError = json["error"]["message"]
+            MsgC(COLOR_WHITE, " > ", COLOR_RED, mError, "\n")
+
+            if OpenAI.Config.DisplayErrorCL:GetBool() then
                 net.Start("OpenAI.errorToCL")
                     net.WriteString(json["error"]["message"])
                 net.Send(ply)
@@ -127,7 +98,7 @@ function OpenAI.imageFetch(ply, msg)
         end
     end)
 
-    openai:SendRequest()
+    request:SendRequest()
 end
 
 
@@ -148,7 +119,7 @@ hook.Add("OpenAI.imagePlyCanUse", "OpenAI.imagePlyCanUse", function(ply)
         canUse = ply:IsSuperAdmin()
     elseif admin == 4 then
         if ULib then
-            canUse = ULib.ucl.query(ply, "OpenAI.image")
+            canUse = ULib.ucl.query(ply, "openai image")
         end
     end
 
@@ -158,12 +129,12 @@ end)
 
 hook.Add("PlayerSay", "OpenAI.image", function(ply, text)
 
-    local cmd, prompt = OpenAI.handleCommands(text)
+    local cmd, prompt = OpenAI.HandleCommands(text)
 
     if cmd == nil or cmd ~= "dalle" then return end
     if prompt == nil or #prompt < 1 then return end
 
-    OpenAI.imageFetch(ply, prompt)
+    OpenAI.ImageFetch(ply, prompt)
 
-    return image_show:GetBool() and "" or text
+    return OpenAI.Config.Dalle.NoShow:GetBool() and "" or text
 end)

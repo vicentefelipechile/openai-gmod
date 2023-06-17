@@ -10,53 +10,37 @@ With this add-on, players can now access exciting features such as:
 ## Chat Functions & Hooks
 
 ```lua
-if SERVER then
-
-  hook.Add("OpenAI.chatFetch", "OpenAI.chatFetch", function(ply, prompt, response)
+-- Shared Hook
+hook.Add("OpenAI.OnChatReceive", "OpenAI.OnChatReceive", function(ply, prompt, response)
 
     print( ply:Nick() ) -- vicentefelipechile
     print( prompt )     -- What is OpenAI
     print( response )   -- OpenAI is an blah blah blah...
     
-  end)
- 
-elseif CLIENT then
-
-  hook.Add("OpenAI.onChatReceive", "OpenAI.onChatReceive", function(ply, prompt, response)
-    -- Your code
-  end)
-  
-end
+end)
 ```
 
 ## Image Functions & Hooks
 
 ```lua
-if SERVER then
-
-  hook.Add("OpenAI.imageFetch", "OpenAI.imageFetch", function(ply, prompt, url)
+-- Shared Hook
+hook.Add("OpenAI.OnImageReceive", "OpenAI.OnImageReceive", function(ply, prompt, url)
 
     print( ply:Nick() ) -- vicentefelipechile
     print( prompt )     -- A cat in the space
     print( url )        -- https://...
-    
-  end)
- 
-elseif CLIENT then
 
-  hook.Add("OpenAI.onImageReceive", "OpenAI.onImageReceive", function(ply, prompt, url)
-    -- Your code
-  end)
+end)
 
-  hook.Add("OpenAI.onImageDownloaded", "OpenAI.onImageDownloaded", function(ply, location, prompt)
+
+-- Client-side Hook
+hook.Add("OpenAI.OnImageDownloaded", "OpenAI.OnImageDownloaded", function(ply, location, prompt)
 
     print( ply:Nick() ) -- vicentefelipechile
     print( location )   -- openai/image/1681134554_a_cat_in_the_space    <-  Path to the image in "DATA"
     print( prompt )     -- A cat in the space
     
-  end)
-  
-end
+end)
 ```
 
 
