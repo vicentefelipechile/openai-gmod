@@ -21,6 +21,10 @@ local openai = {
         failed = function() MsgC(COLOR_RED, err, "\n") end,
     },
 
+    __tostring = function(self)
+        return "URL: " .. self.request["url"] .. ", method:" .. self.request["method"]
+    end,
+
     SetType = function(self, type)
         if not REQUESTS[type] then
             error( "bad argument #1 to 'openai:SetType' (your '" .. tostring(type) .. "' has not been found in the OpenAI.REQUEST table)" )
